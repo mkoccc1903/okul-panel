@@ -1,0 +1,2 @@
+# okul-panel
+okul paneli
