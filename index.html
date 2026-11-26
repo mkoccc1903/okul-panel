@@ -417,7 +417,7 @@
 
             <div id="app-version-badge" title="Pano Sürümü" class="h-full px-3.5 bg-[#121726] border-l border-slate-700/80 text-[11px] font-mono font-bold text-slate-300 flex items-center gap-1.5 shrink-0 z-10 select-none">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
-                <span id="app-version-text">v1.813 stable</span>
+                <span id="app-version-text">v1.814 stable</span>
             </div>
         </footer>
     </div>
@@ -856,8 +856,8 @@
            SÜRÜM & SABİTLER
            ========================================================= */
         const APP_VERSION_MAJOR = 1;
-        const APP_VERSION_MINOR = 813;
-        const STORAGE_KEY = 'cihangir_kayseri_pano_v1813';
+        const APP_VERSION_MINOR = 814;
+        const STORAGE_KEY = 'cihangir_kayseri_pano_v1814';
         const MASTER_ADMIN_CODE = 'administratorlogin';
 
         function formatAppVersion() {
@@ -958,7 +958,7 @@
                     return (subjCode && subjCode.startsWith('ING')) ? 'Büşra Alkan' : 'Bekir Altıntaş';
                 }
                 if (clean === 'SY') {
-                    return (subjCode === 'SB' || subjCode === 'CA') ? 'Sinem Yörenç' : 'Sevda Yıldırım';
+                    return (subjCode === 'SB' || subjCode === 'CA') ? 'Sevda Yıldırım' : 'Sinem Yörenç';
                 }
                 return TEACHER_NAMES[clean] || clean;
             }
