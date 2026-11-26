@@ -335,7 +335,7 @@
                             </span>
                         </div>
                         <span id="timetable-page-indicator" class="text-[11px] font-semibold text-slate-400 dark:text-slate-300 shrink-0 tabular-nums">
-                            Sayfa 1/2
+                            Sayfa 1/4
                         </span>
                     </div>
 
@@ -409,7 +409,7 @@
 
             <div id="app-version-badge" title="Pano Sürümü" class="h-full px-3.5 bg-[#121726] border-l border-slate-700/80 text-[11px] font-mono font-bold text-slate-300 flex items-center gap-1.5 shrink-0 z-10 select-none">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
-                <span id="app-version-text">v1.801 stable</span>
+                <span id="app-version-text">v1.802 stable</span>
             </div>
         </footer>
     </div>
@@ -680,10 +680,10 @@
                 <div id="tab-classes" class="tab-panel hidden space-y-4">
                     <div class="p-3.5 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/25 space-y-2.5">
                         <div class="text-xs font-extrabold text-brand-navy dark:text-blue-300 uppercase tracking-wide">
-                            Sınıf / Şube Yönetimi
+                            Ortaokul Sınıf / Şube Yönetimi
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <input id="inp-new-class-name" type="text" placeholder="Yeni şube adı (Örn: 5-B, 8-C, 12-B)"
+                            <input id="inp-new-class-name" type="text" placeholder="Yeni şube adı (Örn: 5-E, 6-E, 7-E, 8-E)"
                                 class="flex-1 min-w-[180px] px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
                             <button id="btn-add-class" type="button" class="px-3.5 py-2 rounded-xl bg-brand-teal hover:bg-emerald-600 text-white text-xs font-bold shadow-sm transition">
                                 + Şube Ekle
@@ -813,8 +813,8 @@
     <!-- ==================== 5. UYGULAMA BETİĞİ ==================== -->
     <script>
         const APP_VERSION_MAJOR = 1;
-        const APP_VERSION_MINOR = 801;
-        const STORAGE_KEY = 'cihangir_kayseri_pano_v1801';
+        const APP_VERSION_MINOR = 802;
+        const STORAGE_KEY = 'cihangir_kayseri_pano_v1802';
         const ADMIN_MASTER_CODE = 'administratorlogin';
 
         function formatAppVersion() {
@@ -835,7 +835,13 @@
         ];
 
         function buildDefaultClassPrograms() {
-            const classes = ['5-A', '6-A', '7-A', '8-A', '9-A', '10-A', '11-A', '12-A'];
+            const grades = ['5', '6', '7', '8'];
+            const sections = ['A', 'B', 'C', 'D'];
+            const classes = [];
+            grades.forEach(g => {
+                sections.forEach(s => classes.push(`${g}-${s}`));
+            });
+
             const subjects = [
                 { subject: 'Matematik', teacher: 'M. Mavuşgil' },
                 { subject: 'Türkçe', teacher: 'H. Yerer' },
@@ -960,14 +966,14 @@
             },
             classPrograms: buildDefaultClassPrograms(),
             notices: [
-                { tag: 'ÖNEMLİ', color: 'red', title: 'LGS & YKS Deneme Sınavı', desc: 'Cuma günü 09:00’da tüm 8 ve 12. sınıflar için genel deneme yapılacaktır.' },
+                { tag: 'ÖNEMLİ', color: 'red', title: 'LGS Deneme Sınavı', desc: 'Cuma günü 09:00’da tüm 8. sınıflar için genel deneme yapılacaktır.' },
                 { tag: 'ETKİNLİK', color: 'blue', title: 'STEM & Robotik Atölyesi', desc: 'Kodlama kulübü çalışmaları her Salı ve Perşembe 16:00’da laboratuvarda.' },
                 { tag: 'SPOR', color: 'teal', title: 'Okullar Arası Voleybol Turnuvası', desc: 'Okul takımımıza yarı final müsabakasında başarılar dileriz!' }
             ],
             tickerLines: [
                 'Cihangir Okulları Kayseri Merkez Kampüs’e hoş geldiniz! Verimli ve başarılı bir gün dileriz.',
                 'Kütüphanemiz hafta içi her gün 08:15 – 17:00 saatleri arasında tüm öğrencilerimize açıktır.',
-                'LGS ve YKS etüt programları için sınıf rehber öğretmeninizle görüşebilirsiniz.',
+                'LGS etüt programları için sınıf rehber öğretmeninizle görüşebilirsiniz.',
                 'Okul içi düzen ve çevre temizliği hepimizin ortak sorumluluğudur.'
             ],
             menuByDay: {
