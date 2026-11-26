@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cihangir Okulları | Kayseri Merkez Kampüs - Dijital Pano</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter (Türkçe karakter tam destekli) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QR Kod Üretici (Tamamen İstemci Taraflı) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            navy: '#1B2033',
+                            blue: '#4B75E6',
+                            teal: '#00B58E',
+                            red: '#EE2718',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================================================
+           DUYARLI (RESPONSIVE) VE SIFIR TAŞMALI ANA DÜZEN
+           ========================================================= */
+        .board-shell {
+            display: grid;
+            grid-template-rows: auto 1fr 42px;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .board-main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+            padding: 14px;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        .board-col {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 0;
+            min-width: 0;
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .board-main {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .col-center {
+                grid-column: span 2 / span 2;
+                order: -1;
+            }
+        }
+
+        @media (min-width: 1025px) and (min-height: 660px) {
+            html, body {
+                height: 100vh;
+                overflow: hidden;
+            }
+            .board-shell {
+                height: 100vh;
+                grid-template-rows: 68px minmax(0, 1fr) 42px;
+                overflow: hidden;
+            }
+            .board-main {
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                overflow: hidden;
+            }
+            .col-left { grid-column: span 3 / span 3; }
+            .col-center { grid-column: span 5 / span 5; }
+            .col-right { grid-column: span 4 / span 4; }
+
+            .card-showcase { flex: 58 1 0%; min-height: 0; }
+            .card-classes  { flex: 42 1 0%; min-height: 0; }
+            .card-duty     { flex: 58 1 0%; min-height: 0; }
+            .card-notices  { flex: 42 1 0%; min-height: 0; }
+        }
+
+        @media (max-width: 1024px), (max-height: 659px) {
+            html, body {
+                height: auto;
+                overflow-y: auto;
+            }
+            .card-showcase { min-height: 290px; }
+            .card-classes  { min-height: 250px; }
+            .card-duty     { min-height: 310px; }
+            .card-notices  { min-height: 260px; }
+        }
+
+        /* Kayan Duyuru Bandı */
+        .ticker-viewport {
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+            flex: 1;
+            min-width: 0;
+        }
+        .ticker-track {
+            display: inline-flex;
+            align-items: center;
+            width: max-content;
+            animation: ticker-scroll 42s linear infinite;
+        }
+        .ticker-viewport:hover .ticker-track {
+            animation-play-state: paused;
+        }
+        @keyframes ticker-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .slide-fade {
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .thin-scroll::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .thin-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .thin-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+        }
+
+        .clock-fluid {
+            font-size: clamp(1.15rem, 1.55vw, 1.55rem);
+            font-variant-numeric: tabular-nums;
+        }
+        .countdown-fluid {
+            font-size: clamp(2.1rem, 2.9vw, 3.1rem);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        /* Karanlık Mod Yüksek Kontrast & Ters Yazı Rengi Koruması */
+        html.dark body {
+            color: #F8FAFC;
+        }
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            color: #F8FAFC;
+            color-scheme: dark;
+        }
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #94A3B8;
+        }
+    </style>
+</head>
+<body class="bg-[#F1F5F9] dark:bg-[#0D111D] text-slate-900 dark:text-white transition-colors duration-300">
+
+    <div class="board-shell">
+        <!-- ==================== 1. ÜST BİLGİ ÇUBUĞU ==================== -->
+        <header class="w-full bg-white dark:bg-[#141928] border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-11 h-11 bg-white rounded-xl p-1.5 flex items-center justify-center border border-slate-200/90 shadow-sm shrink-0 overflow-hidden">
+                    <svg id="header-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full" aria-label="Cihangir Okulları Logosu">
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#EE2718" transform="rotate(0 50 50)"/>
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(135 50 50)"/>
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(180 50 50)"/>
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(225 50 50)"/>
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#4B75E6" transform="rotate(270 50 50)"/>
+                        <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#00B58E" transform="rotate(315 50 50)"/>
+                    </svg>
+                    <img id="header-logo-img" src="" alt="Okul Logosu" class="hidden w-full h-full object-contain">
+                </div>
+
+                <div class="min-w-0 leading-tight">
+                    <div class="flex items-center gap-2">
+                        <h1 id="header-school-name" class="font-display font-extrabold text-brand-navy dark:text-white tracking-tight truncate" style="font-size: clamp(1rem, 1.35vw, 1.3rem);">
+                            CİHANGİR OKULLARI
+                        </h1>
+                        <span id="sim-badge" class="hidden px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-500/40 shrink-0">
+                            Test Modu
+                        </span>
+                    </div>
+                    <p id="header-school-subtitle" class="text-xs font-semibold text-slate-500 dark:text-slate-300 truncate mt-0.5">
+                        Kayseri Merkez Kampüs
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 sm:gap-3.5 ml-auto">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/70 text-xs font-semibold text-slate-700 dark:text-slate-200">
+                    <span id="header-weather-icon" class="text-base leading-none">🌤️</span>
+                    <span id="header-weather-text">Kayseri Kocasinan • Yükleniyor...</span>
+                </div>
+
+                <div class="flex items-center gap-3 px-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-800">
+                    <div id="header-date" class="hidden sm:block text-xs font-semibold text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                        26 Kasım Perşembe
+                    </div>
+                    <div class="hidden sm:block w-px h-5 bg-slate-200 dark:bg-slate-700"></div>
+                    <div id="header-clock" class="clock-fluid font-display font-extrabold text-brand-navy dark:text-white tracking-tight leading-none">
+                        09:35:00
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <button id="btn-theme" type="button" title="Açık / Koyu Tema" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition">
+                        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </button>
+
+                    <button id="btn-fullscreen" type="button" title="Tam Ekran" class="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                    </button>
+
+                    <button id="btn-settings" type="button" title="Pano Ayarları ve Test Modu" class="h-9 px-3 rounded-xl flex items-center gap-1.5 bg-brand-navy hover:bg-[#262d47] dark:bg-brand-blue dark:hover:bg-blue-600 text-white text-xs font-bold shadow-sm transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        <span class="hidden lg:inline">Ayarlar</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==================== 2. ANA DASHBOARD IZGARASI ==================== -->
+        <main class="board-main">
+
+            <!-- ========== SOL SÜTUN: ZİL SAYACI & DERS SAATLERİ ========== -->
+            <section class="board-col col-left">
+                <div class="rounded-2xl bg-brand-navy text-white p-4 shadow-sm border border-slate-800/40 shrink-0 flex flex-col justify-between gap-3 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-brand-blue/20 blur-2xl pointer-events-none"></div>
+
+                    <div class="flex items-center justify-between gap-2 relative z-10">
+                        <span id="bell-status-pill" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-brand-blue/25 text-blue-200 border border-brand-blue/40">
+                            <span id="bell-status-dot" class="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse"></span>
+                            <span id="bell-status-label">1. DERS</span>
+                        </span>
+                        <span id="bell-range-label" class="text-xs font-medium text-slate-300 tabular-nums">09:00 - 09:40</span>
+                    </div>
+
+                    <div class="text-center py-1 relative z-10">
+                        <div id="bell-countdown" class="countdown-fluid font-display font-extrabold tracking-tight text-white">
+                            05:00
+                        </div>
+                        <div id="bell-sub-label" class="text-[11px] font-medium text-slate-400 mt-1">
+                            Teneffüse kalan süre
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 relative z-10">
+                        <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                            <div id="bell-progress-bar" class="h-full bg-brand-teal rounded-full transition-all duration-1000 ease-linear" style="width: 55%;"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-slate-300 font-medium">
+                            <span id="bell-next-line" class="truncate">Sıradaki: Teneffüs • 09:40</span>
+                            <span id="bell-pct" class="tabular-nums text-slate-400 ml-2 shrink-0">%55</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 min-h-0 rounded-2xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 shadow-sm p-3.5 flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <h2 class="font-display font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-200">
+                            Günlük Ders Saatleri
+                        </h2>
+                        <span class="text-[11px] font-semibold text-brand-blue dark:text-blue-400">8 Ders</span>
+                    </div>
+                    <div id="schedule-list" class="flex-1 min-h-0 flex flex-col justify-between gap-1 overflow-y-auto thin-scroll pr-0.5"></div>
+                </div>
+            </section>
+
+            <!-- ========== ORTA SÜTUN: GÖRSEL VİTRİN & ANLIK DERS PROGRAMI ========== -->
+            <section class="board-col col-center">
+                <div class="card-showcase relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-brand-navy flex flex-col justify-end group">
+                    <div id="slide-fallback" class="absolute inset-0 bg-gradient-to-br from-brand-navy via-[#243259] to-[#0f3b3e] flex items-center justify-center">
+                        <svg class="w-24 h-24 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+
+                    <img id="slide-image" src="" alt="Vitrin Görseli" class="slide-fade absolute inset-0 w-full h-full object-cover opacity-100">
+                    <div class="absolute inset-0 bg-gradient-to-t from-[#0D111D]/90 via-[#0D111D]/30 to-transparent pointer-events-none"></div>
+
+                    <div class="relative z-10 p-4 lg:p-5 flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span id="slide-category" class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-brand-blue text-white shadow-sm">
+                                Günün Bilgisi
+                            </span>
+                            <div id="slide-dots" class="flex items-center gap-1.5"></div>
+                        </div>
+                        <h3 id="slide-title" class="font-display font-extrabold text-white tracking-tight leading-snug drop-shadow-sm" style="font-size: clamp(1.05rem, 1.45vw, 1.35rem);">
+                            Günlük Bilgi Vitrini Yükleniyor...
+                        </h3>
+                        <p id="slide-desc" class="text-xs sm:text-sm text-slate-200/95 truncate">
+                            Spor, doğa ve müzik dünyasından okula uygun her gün yenilenen içerikler.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-classes rounded-2xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 shadow-sm p-4 flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <h2 class="font-display font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-200 truncate">
+                                Şu An Sınıflarda
+                            </h2>
+                            <span id="timetable-period-badge" class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 dark:text-blue-300 shrink-0">
+                                1. Ders
+                            </span>
+                        </div>
+                        <span id="timetable-page-indicator" class="text-[11px] font-semibold text-slate-400 dark:text-slate-300 shrink-0 tabular-nums">
+                            Sayfa 1/2
+                        </span>
+                    </div>
+
+                    <div id="classes-grid" class="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-2.5"></div>
+                </div>
+            </section>
+
+            <!-- ========== SAĞ SÜTUN: NÖBET ÇİZELGESİ & DUYURULAR/HABERLER/MENÜ/DÜNYA ========== -->
+            <section class="board-col col-right">
+                <div class="card-duty rounded-2xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 shadow-sm p-4 flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <h2 class="font-display font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-200 truncate">
+                                Günün Nöbetçileri
+                            </h2>
+                            <button id="duty-page-indicator" type="button" title="Sonraki nöbet sayfası" class="hidden px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-200 border border-slate-200 dark:border-slate-700 tabular-nums shrink-0 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                                1/2
+                            </button>
+                        </div>
+                        <span id="duty-day-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-teal/15 text-emerald-700 dark:text-brand-teal shrink-0">
+                            Perşembe Nöbeti
+                        </span>
+                    </div>
+
+                    <div id="duty-teachers-list" class="flex-1 min-h-0 flex flex-col gap-1.5 overflow-y-auto thin-scroll pr-0.5"></div>
+                </div>
+
+                <div class="card-notices rounded-2xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 shadow-sm p-3.5 flex flex-col overflow-hidden">
+                    <div class="flex items-center justify-between gap-1.5 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div class="flex items-center gap-1 min-w-0 overflow-x-auto thin-scroll">
+                            <button id="btn-panel-notices" type="button" class="px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-brand-navy text-white dark:bg-brand-blue transition whitespace-nowrap shrink-0">
+                                Duyurular
+                            </button>
+                            <button id="btn-panel-news" type="button" class="px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0">
+                                Haberler
+                            </button>
+                            <button id="btn-panel-menu" type="button" class="px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0">
+                                Yemek Menüsü
+                            </button>
+                            <button id="btn-panel-world" type="button" class="px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0">
+                                Dünya
+                            </button>
+                        </div>
+                        <span id="notices-news-dot" class="w-2 h-2 rounded-full bg-brand-red shrink-0"></span>
+                    </div>
+
+                    <div id="campus-notices-list" class="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-y-auto thin-scroll"></div>
+                    <div id="current-news-list" class="hidden flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-y-auto thin-scroll"></div>
+                    <div id="daily-menu-panel" class="hidden flex-1 min-h-0 flex flex-col justify-between gap-1.5 overflow-y-auto thin-scroll"></div>
+                    <!-- 5 Dünya Merkezi (İstanbul, Londra, New York, Tokyo, Berlin) -->
+                    <div id="world-centers-panel" class="hidden flex-1 min-h-0 flex flex-col justify-between gap-1.5 overflow-y-auto thin-scroll"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ==================== 3. ALT KAYAN DUYURU BANDI ==================== -->
+        <footer class="w-full h-[42px] bg-brand-navy text-white flex items-center overflow-hidden border-t border-slate-800 z-20">
+            <div class="h-full px-4 bg-brand-red text-white font-display font-extrabold text-xs uppercase tracking-widest flex items-center gap-2 shrink-0 z-10 shadow-md">
+                <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                DUYURU
+            </div>
+
+            <div class="ticker-viewport">
+                <div id="ticker-track" class="ticker-track text-xs sm:text-sm font-medium text-slate-100"></div>
+            </div>
+
+            <div class="hidden sm:flex h-full px-3 bg-[#151A2B] border-l border-slate-700/80 text-[10px] lg:text-[11px] font-medium text-slate-300 items-center shrink-0 z-10 select-none whitespace-nowrap">
+                <span class="text-slate-400 mr-1">Powered by</span>
+                <span class="font-semibold text-white">Ömer Pelin, Aras Karaca, Mert Albayrak, Recep Özbolat</span>
+            </div>
+
+            <div id="app-version-badge" title="Pano Sürümü" class="h-full px-3.5 bg-[#121726] border-l border-slate-700/80 text-[11px] font-mono font-bold text-slate-300 flex items-center gap-1.5 shrink-0 z-10 select-none">
+                <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                <span id="app-version-text">v1.801 stable</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== 3.5. QR KOD GÜVENLİK DOĞRULAMA MODALI ==================== -->
+    <div id="qr-lock-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0F1422] flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-brand-navy dark:bg-brand-blue text-white flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 class="font-display font-extrabold text-sm text-brand-navy dark:text-white truncate">Ayarlar Güvenlik Kilidi</h3>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Telefonunuzla QR kodu okutun</p>
+                    </div>
+                </div>
+                <button id="btn-close-qr-modal" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="p-5 flex flex-col items-center gap-4 text-center">
+                <div class="p-3 bg-white rounded-2xl border-2 border-slate-200 shadow-inner flex items-center justify-center">
+                    <div id="qr-code-container" class="w-[180px] h-[180px] flex items-center justify-center"></div>
+                </div>
+
+                <div class="w-full flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 px-1">
+                    <span id="qr-expire-label" class="tabular-nums">Kod geçerliliği: 120 sn</span>
+                    <button id="btn-refresh-qr" type="button" class="text-brand-blue hover:underline font-bold">Yeni Kod Üret</button>
+                </div>
+
+                <div class="w-full space-y-2">
+                    <label for="inp-qr-pin" class="block text-xs font-bold text-slate-600 dark:text-slate-300">
+                        Telefonda Görünen 5 Haneli Kod
+                    </label>
+                    <input id="inp-qr-pin" type="text" maxlength="32" autocomplete="off" placeholder="• • • • •"
+                        class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 text-center font-mono font-extrabold text-lg tracking-[0.18em] text-brand-navy dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                    <div id="qr-pin-error" class="hidden text-xs font-bold text-brand-red">
+                        Kod hatalı! Lütfen QR kodu tekrar okutarak deneyin.
+                    </div>
+                </div>
+
+                <div class="w-full flex items-center gap-2 pt-1">
+                    <button id="btn-cancel-qr" type="button" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+                        İptal
+                    </button>
+                    <button id="btn-verify-qr" type="button" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-brand-blue hover:bg-blue-600 text-white shadow-sm transition">
+                        Doğrula ve Aç
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 4. AYARLAR & TEST MODU MODALI ==================== -->
+    <div id="settings-modal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+
+            <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-[#0F1422]">
+                <div>
+                    <h3 class="font-display font-extrabold text-base sm:text-lg text-brand-navy dark:text-white">
+                        Pano Ayarları &amp; Yönetim
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        Cihangir Okulları – Kayseri Merkez Kampüs dijital pano içeriklerini düzenleyin.
+                    </p>
+                </div>
+                <button id="btn-close-modal" type="button" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <div class="flex overflow-x-auto border-b border-slate-200 dark:border-slate-800 px-4 gap-1 bg-white dark:bg-[#141928] shrink-0">
+                <button data-tab="general" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-brand-blue text-brand-blue whitespace-nowrap">Genel &amp; Logo</button>
+                <button data-tab="duty" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white whitespace-nowrap">Nöbet &amp; Dersler</button>
+                <button data-tab="classes" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white whitespace-nowrap">Sınıf Dersleri</button>
+                <button data-tab="content" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white whitespace-nowrap">Duyurular &amp; Slaytlar</button>
+                <button data-tab="extras" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 whitespace-nowrap">Yemek Menüsü</button>
+                <button data-tab="simulation" class="modal-tab px-3.5 py-3 text-xs sm:text-sm font-bold border-b-2 border-transparent text-amber-600 dark:text-amber-400 hover:text-amber-700 whitespace-nowrap">Saat Simülasyonu</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-5 text-sm thin-scroll">
+
+                <!-- SEKME 1: GENEL & LOGO -->
+                <div id="tab-general" class="tab-panel space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Okul Adı</label>
+                            <input id="inp-school-name" type="text" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Kampüs Alt Başlığı</label>
+                            <input id="inp-school-subtitle" type="text" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                        </div>
+                        <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="sm:col-span-3 flex items-center justify-between gap-3 p-3 rounded-xl bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/20">
+                                <div>
+                                    <div class="text-xs font-bold text-brand-navy dark:text-blue-300">Otomatik Canlı Hava Durumu (Kayseri Kocasinan)</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400">Ücretsiz Open-Meteo API ile her 15 dakikada bir otomatik güncellenir.</div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input id="inp-weather-auto" type="checkbox" class="sr-only peer">
+                                    <div class="w-10 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-blue"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Hava İkonu</label>
+                                <select id="inp-weather-icon" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold">
+                                    <option value="🌤️">🌤️ Az Bulutlu</option>
+                                    <option value="⛅">⛅ Parçalı Bulutlu</option>
+                                    <option value="☀️">☀️ Güneşli</option>
+                                    <option value="☁️">☁️ Bulutlu</option>
+                                    <option value="🌧️">🌧️ Yağmurlu</option>
+                                    <option value="⛈️">⛈️ Gök Gürültülü Sağanak</option>
+                                    <option value="❄️">❄️ Karlı</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Hava Durumu Metni (Manuel Yedek)</label>
+                                <input id="inp-weather-text" type="text" placeholder="Kayseri Kocasinan • 4°C • Az Bulutlu" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-800 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="font-bold text-slate-800 dark:text-white text-sm">Otomatik Karanlık (Gece) Modu</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-300">Hava durumuna veya belirlediğiniz saat aralığına göre otomatik karanlık moda geçer.</div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                                <input id="inp-autodark-enabled" type="checkbox" class="sr-only peer">
+                                <div class="w-10 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-blue"></div>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-800">
+                            <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 cursor-pointer select-none">
+                                <input id="inp-autodark-weather" type="checkbox" class="mt-0.5 w-4 h-4 rounded accent-brand-blue shrink-0">
+                                <div class="text-xs">
+                                    <div class="font-bold text-slate-800 dark:text-white">Hava Durumuna Göre</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-300 mt-0.5">Bulutlu, yağmurlu veya gök gürültülü sağanakta karanlık moda geçer.</div>
+                                </div>
+                            </label>
+
+                            <div class="p-2.5 rounded-xl bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 space-y-2">
+                                <label class="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-white cursor-pointer select-none">
+                                    <input id="inp-autodark-time" type="checkbox" class="w-4 h-4 rounded accent-brand-blue shrink-0">
+                                    <span>Saat Aralığına Göre</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="block text-[10px] font-bold text-slate-500 dark:text-slate-300 mb-0.5">Başlangıç</span>
+                                        <input id="inp-autodark-start" type="time" value="17:30" class="w-full px-2 py-1 rounded-lg bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                                    </div>
+                                    <div>
+                                        <span class="block text-[10px] font-bold text-slate-500 dark:text-slate-300 mb-0.5">Bitiş</span>
+                                        <input id="inp-autodark-end" type="time" value="07:30" class="w-full px-2 py-1 rounded-lg bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 bg-white rounded-xl p-1.5 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                                <img id="preview-logo-img" src="" alt="Özel Logo" class="hidden w-full h-full object-contain">
+                                <svg id="preview-logo-svg" viewBox="0 0 100 100" fill="none" class="w-full h-full">
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#EE2718" transform="rotate(0 50 50)"/>
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(135 50 50)"/>
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(180 50 50)"/>
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#1B2033" transform="rotate(225 50 50)"/>
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#4B75E6" transform="rotate(270 50 50)"/>
+                                    <path d="M 53.5 38.35 L 53.5 8.7 Q 53.5 5.5 56.46 6.73 L 76.04 14.83 Q 79.0 16.06 76.74 18.32 L 55.76 39.29 Q 53.5 41.55 53.5 38.35 Z" fill="#00B58E" transform="rotate(315 50 50)"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-bold text-slate-800 dark:text-white text-sm">Kurum Logosu</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">Varsayılan Cihangir SVG logosu aktif. İsterseniz PNG/JPG yükleyebilirsiniz.</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="cursor-pointer px-3 py-2 rounded-xl bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold transition">
+                                Logo Yükle
+                                <input id="inp-logo-file" type="file" accept="image/*" class="hidden">
+                            </label>
+                            <button id="btn-reset-logo" type="button" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition">
+                                Varsayılana Dön
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="font-bold text-slate-800 dark:text-white text-sm">Ayarlar QR Kod Koruması</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-300">Açıkken ayarlar menüsüne girmeden önce telefonla okutulan 5 haneli QR kod istenir.</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input id="inp-qr-protection" type="checkbox" class="sr-only peer">
+                            <div class="w-10 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-blue"></div>
+                        </label>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="font-bold text-slate-800 dark:text-white text-sm">Ayarları Yedekle / Geri Yükle (JSON)</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-300">Tüm pano ayarlarını JSON dosyası olarak dışa aktarın veya mevcut bir yedeği içe aktarın.</div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button id="btn-export-json" type="button" class="px-3.5 py-2 rounded-xl bg-brand-teal hover:bg-emerald-600 text-white text-xs font-bold shadow-sm transition">
+                                Dışa Aktar (.json)
+                            </button>
+                            <label class="cursor-pointer px-3.5 py-2 rounded-xl bg-brand-navy hover:bg-[#262d47] dark:bg-brand-blue dark:hover:bg-blue-600 text-white text-xs font-bold shadow-sm transition">
+                                İçe Aktar (.json)
+                                <input id="inp-import-json" type="file" accept=".json,application/json" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEKME 2: NÖBET & DERSLER -->
+                <div id="tab-duty" class="tab-panel hidden space-y-5">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Nöbet Çizelgesi Düzenle</label>
+                            <select id="inp-duty-day-select" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                                <option value="1">Pazartesi</option>
+                                <option value="2">Salı</option>
+                                <option value="3" selected>Çarşamba</option>
+                                <option value="4">Perşembe</option>
+                                <option value="5">Cuma</option>
+                            </select>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/25 space-y-2.5">
+                            <div class="text-xs font-extrabold text-brand-navy dark:text-blue-300 uppercase tracking-wide">
+                                Nöbet Yeri Ekle
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <input id="inp-new-duty-area" type="text" placeholder="Örn: Yemekhane, 2. Kat, Spor Salonu, -1. Kat..."
+                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                                <input id="inp-new-duty-teacher" type="text" placeholder="Nöbetçi Öğretmen (Opsiyonel)"
+                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                                <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-300 cursor-pointer select-none">
+                                    <input id="inp-new-duty-all-days" type="checkbox" checked class="w-4 h-4 rounded accent-brand-blue">
+                                    <span>Tüm haftanın günlerine ekle</span>
+                                </label>
+                                <button id="btn-add-duty-area" type="button" class="px-3.5 py-2 rounded-xl bg-brand-teal hover:bg-emerald-600 text-white text-xs font-bold shadow-sm transition">
+                                    + Nöbet Yeri Ekle
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="modal-duty-editor" class="space-y-2"></div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-2">Günlük Ders Saatleri</label>
+                        <div id="modal-schedule-editor" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+                    </div>
+                </div>
+
+                <!-- SEKME 3: SINIF DERSLERİ -->
+                <div id="tab-classes" class="tab-panel hidden space-y-4">
+                    <div class="p-3.5 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/25 space-y-2.5">
+                        <div class="text-xs font-extrabold text-brand-navy dark:text-blue-300 uppercase tracking-wide">
+                            Sınıf / Şube Yönetimi
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input id="inp-new-class-name" type="text" placeholder="Yeni şube adı (Örn: 5-B, 8-C, 12-B)"
+                                class="flex-1 min-w-[180px] px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            <button id="btn-add-class" type="button" class="px-3.5 py-2 rounded-xl bg-brand-teal hover:bg-emerald-600 text-white text-xs font-bold shadow-sm transition">
+                                + Şube Ekle
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="inp-class-select" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold"></select>
+                            <select id="inp-class-day-select" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                                <option value="1">Pazartesi</option>
+                                <option value="2">Salı</option>
+                                <option value="3" selected>Çarşamba</option>
+                                <option value="4">Perşembe</option>
+                                <option value="5">Cuma</option>
+                            </select>
+                        </div>
+                        <button id="btn-delete-class" type="button" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-500/15 dark:hover:bg-red-500/25 text-brand-red dark:text-red-300 text-xs font-bold transition">
+                            Seçili Şubeyi Sil
+                        </button>
+                    </div>
+
+                    <div id="modal-class-lessons-editor" class="space-y-2"></div>
+                </div>
+
+                <!-- SEKME 4: DUYURULAR & SLAYTLAR -->
+                <div id="tab-content" class="tab-panel hidden space-y-5">
+                    <div class="space-y-2.5">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Kampüs Duyuruları (3 Adet)</label>
+                        <div id="modal-notices-editor" class="space-y-2.5"></div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Alt Kayan Duyuru Bandı (Her satır ayrı bir mesaj)</label>
+                        <textarea id="inp-ticker-lines" rows="4" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-blue"></textarea>
+                    </div>
+                </div>
+
+                <!-- SEKME 5: YEMEK MENÜSÜ -->
+                <div id="tab-extras" class="tab-panel hidden space-y-4">
+                    <div class="flex items-center justify-between gap-2">
+                        <label class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Haftalık Yemek Menüsü</label>
+                        <select id="inp-menu-day-select" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                            <option value="1">Pazartesi</option>
+                            <option value="2">Salı</option>
+                            <option value="3" selected>Çarşamba</option>
+                            <option value="4">Perşembe</option>
+                            <option value="5">Cuma</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Çorba</label>
+                            <input id="inp-menu-soup" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Ana Yemek</label>
+                            <input id="inp-menu-main" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Yardımcı Yemek</label>
+                            <input id="inp-menu-side" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tatlı / İçecek</label>
+                            <input id="inp-menu-extra" type="text" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEKME 6: SAAT SİMÜLASYONU -->
+                <div id="tab-simulation" class="tab-panel hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="font-bold text-amber-900 dark:text-amber-300 text-sm">Test Modu (Saat Simülasyonu)</div>
+                            <div class="text-xs text-amber-800/80 dark:text-amber-200/80">Okul saatleri dışında ders, teneffüs, öğle arası ve gece modunu test edebilirsiniz.</div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input id="inp-sim-enabled" type="checkbox" class="sr-only peer">
+                            <div class="w-10 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Simülasyon Günü</label>
+                            <select id="inp-sim-day" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold">
+                                <option value="1">Pazartesi</option>
+                                <option value="2">Salı</option>
+                                <option value="3">Çarşamba</option>
+                                <option value="4">Perşembe</option>
+                                <option value="5">Cuma</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1.5">Simülasyon Saati</label>
+                            <input id="inp-sim-time" type="time" value="09:15" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 font-semibold">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <button type="button" data-preset="09:15" class="sim-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold">09:15 (1. Ders)</button>
+                        <button type="button" data-preset="09:45" class="sim-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold">09:45 (Teneffüs)</button>
+                        <button type="button" data-preset="12:30" class="sim-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold">12:30 (Öğle Arası)</button>
+                        <button type="button" data-preset="18:00" class="sim-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold">18:00 (Gece Modu)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0F1422] flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <button id="btn-reset-all" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold text-brand-red hover:bg-red-50 dark:hover:bg-red-500/10 transition">
+                    Varsayılana Sıfırla
+                </button>
+                <div class="flex items-center gap-2">
+                    <button id="btn-cancel-modal" type="button" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+                        İptal
+                    </button>
+                    <button id="btn-save-modal" type="button" class="px-5 py-2 rounded-xl text-xs font-bold bg-brand-blue hover:bg-blue-600 text-white shadow-sm transition">
+                        Kaydet ve Uygula
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 5. UYGULAMA BETİĞİ ==================== -->
+    <script>
+        const APP_VERSION_MAJOR = 1;
+        const APP_VERSION_MINOR = 801;
+        const STORAGE_KEY = 'cihangir_kayseri_pano_v1801';
+        const ADMIN_MASTER_CODE = 'administratorlogin';
+
+        function formatAppVersion() {
+            const minorStr = String(APP_VERSION_MINOR).padStart(3, '0').replace(/0+$/, '');
+            return minorStr ? `v${APP_VERSION_MAJOR}.${minorStr} stable` : `v${APP_VERSION_MAJOR} stable`;
+        }
+
+        const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+        // Dünya Merkezleri (İstenen Sıra: 1. İstanbul, 2. Londra, 3. New York, 4. Tokyo, 5. Berlin)
+        const WORLD_CENTERS = [
+            { id: 'istanbul', name: 'İstanbul', flag: '🇹🇷', tz: 'Europe/Istanbul', lat: 41.0082, lon: 28.9784, icon: '🌤️', temp: '--', desc: 'Yükleniyor...' },
+            { id: 'london',   name: 'Londra',   flag: '🇬🇧', tz: 'Europe/London',   lat: 51.5074, lon: -0.1278, icon: '⛅', temp: '--', desc: 'Yükleniyor...' },
+            { id: 'newyork',  name: 'New York', flag: '🇺🇸', tz: 'America/New_York',lat: 40.7128, lon: -74.0060, icon: '☀️', temp: '--', desc: 'Yükleniyor...' },
+            { id: 'tokyo',    name: 'Tokyo',    flag: '🇯🇵', tz: 'Asia/Tokyo',      lat: 35.6762, lon: 139.6503, icon: '🌤️', temp: '--', desc: 'Yükleniyor...' },
+            { id: 'berlin',   name: 'Berlin',   flag: '🇩🇪', tz: 'Europe/Berlin',   lat: 52.5200, lon: 13.4050,  icon: '☁️', temp: '--', desc: 'Yükleniyor...' }
+        ];
+
+        function buildDefaultClassPrograms() {
+            const classes = ['5-A', '6-A', '7-A', '8-A', '9-A', '10-A', '11-A', '12-A'];
+            const subjects = [
+                { subject: 'Matematik', teacher: 'M. Mavuşgil' },
+                { subject: 'Türkçe', teacher: 'H. Yerer' },
+                { subject: 'Fen Bilimleri', teacher: 'Ö. F. Güngör' },
+                { subject: 'İngilizce', teacher: 'Z. B. Güven' },
+                { subject: 'Sosyal Bilgiler', teacher: 'K. Altınöz' },
+                { subject: 'Bilişim & Kodlama', teacher: 'B. E. Öztürk' },
+                { subject: 'Müzik', teacher: 'S. Yörenç' },
+                { subject: 'Beden Eğitimi', teacher: 'M. Çobanoğlu' }
+            ];
+            const map = {};
+            classes.forEach((cls, cIdx) => {
+                map[cls] = {};
+                for (let d = 1; d <= 5; d++) {
+                    map[cls][String(d)] = [];
+                    for (let p = 0; p < 8; p++) {
+                        const pick = subjects[(cIdx + d + p) % subjects.length];
+                        map[cls][String(d)].push({ subject: pick.subject, teacher: pick.teacher });
+                    }
+                }
+            });
+            return map;
+        }
+
+        const DEFAULT_STATE = {
+            theme: 'light',
+            qrProtection: true,
+            autoDark: {
+                enabled: true,
+                byWeather: true,
+                byTime: true,
+                startTime: '17:30',
+                endTime: '07:30'
+            },
+            schoolName: 'CİHANGİR OKULLARI',
+            schoolSubtitle: 'Kayseri Merkez Kampüs',
+            weatherAuto: true,
+            weatherIcon: '🌤️',
+            weatherText: 'Kayseri Kocasinan • 4°C • Az Bulutlu',
+            customLogo: '',
+            simulation: {
+                enabled: false,
+                dayIdx: 3,
+                time: '09:15'
+            },
+            schedule: [
+                { id: 1, name: '1. Ders', start: '09:00', end: '09:40' },
+                { id: 2, name: '2. Ders', start: '09:50', end: '10:30' },
+                { id: 3, name: '3. Ders', start: '10:40', end: '11:20' },
+                { id: 4, name: '4. Ders', start: '11:30', end: '12:10' },
+                { id: 5, name: '5. Ders', start: '13:00', end: '13:40' },
+                { id: 6, name: '6. Ders', start: '13:50', end: '14:30' },
+                { id: 7, name: '7. Ders', start: '14:40', end: '15:20' },
+                { id: 8, name: '8. Ders', start: '15:30', end: '16:10' }
+            ],
+            dutyByDay: {
+                '1': [
+                    { area: '1. Kat Kuzey', teacher: 'Zeynep Birsen Güven' },
+                    { area: '1. Kat Güney', teacher: 'Selma Ersem' },
+                    { area: '2. Kat Kuzey', teacher: 'Büşra Alkan' },
+                    { area: '2. Kat Güney', teacher: 'Sinem Yörenç' },
+                    { area: '3. Kat Kuzey', teacher: '' },
+                    { area: '3. Kat Güney', teacher: '' },
+                    { area: '4. Kat Kuzey', teacher: '' },
+                    { area: '4. Kat Güney', teacher: '' },
+                    { area: 'Bahçe Ön-Yan', teacher: 'Asuman Aytekin' },
+                    { area: 'Bahçe Arka-Yan', teacher: 'Emine Karpuzcu Sazak' },
+                    { area: '-1. Kat', teacher: 'Hümeyra Mutlu' }
+                ],
+                '2': [
+                    { area: '1. Kat Kuzey', teacher: 'Mustafa Mavuşgil' },
+                    { area: '1. Kat Güney', teacher: 'Gülay Yüksel' },
+                    { area: '2. Kat Kuzey', teacher: 'Ömer Faruk Güngör' },
+                    { area: '2. Kat Güney', teacher: 'Sevda Yıldırım' },
+                    { area: '3. Kat Kuzey', teacher: '' },
+                    { area: '3. Kat Güney', teacher: '' },
+                    { area: '4. Kat Kuzey', teacher: '' },
+                    { area: '4. Kat Güney', teacher: '' },
+                    { area: 'Bahçe Ön-Yan', teacher: 'Gürkan Göçen' },
+                    { area: 'Bahçe Arka-Yan', teacher: 'Yaşar Barık' },
+                    { area: '-1. Kat', teacher: 'Mehmet Koç' }
+                ],
+                '3': [
+                    { area: '1. Kat Kuzey', teacher: 'Handan Yerer' },
+                    { area: '1. Kat Güney', teacher: 'Bulut Efe Öztürk' },
+                    { area: '2. Kat Kuzey', teacher: 'Tuhan Öksüz' },
+                    { area: '2. Kat Güney', teacher: 'Kazım Altınöz' },
+                    { area: '3. Kat Kuzey', teacher: '' },
+                    { area: '3. Kat Güney', teacher: '' },
+                    { area: '4. Kat Kuzey', teacher: '' },
+                    { area: '4. Kat Güney', teacher: '' },
+                    { area: 'Bahçe Ön-Yan', teacher: 'Zeynep Birsen Güven' },
+                    { area: 'Bahçe Arka-Yan', teacher: 'Murat Çobanoğlu' },
+                    { area: '-1. Kat', teacher: 'Hakan Yılmaz' }
+                ],
+                '4': [
+                    { area: '1. Kat Kuzey', teacher: 'Büşra Alkan' },
+                    { area: '1. Kat Güney', teacher: 'Emine Karpuzcu Sazak' },
+                    { area: '2. Kat Kuzey', teacher: 'Selma Ersem' },
+                    { area: '2. Kat Güney', teacher: 'Ayşe Demirbilek Yağmur' },
+                    { area: '3. Kat Kuzey', teacher: '' },
+                    { area: '3. Kat Güney', teacher: '' },
+                    { area: '4. Kat Kuzey', teacher: '' },
+                    { area: '4. Kat Güney', teacher: '' },
+                    { area: 'Bahçe Ön-Yan', teacher: 'Ömer Faruk Güngör' },
+                    { area: 'Bahçe Arka-Yan', teacher: 'Hümeyra Mutlu' },
+                    { area: '-1. Kat', teacher: 'Pembe Yürüm' }
+                ],
+                '5': [
+                    { area: '1. Kat Kuzey', teacher: 'Bekir Altıntaş' },
+                    { area: '1. Kat Güney', teacher: 'Mustafa Mavuşgil' },
+                    { area: '2. Kat Kuzey', teacher: 'Sinem Yörenç' },
+                    { area: '2. Kat Güney', teacher: 'Asuman Aytekin' },
+                    { area: '3. Kat Kuzey', teacher: '' },
+                    { area: '3. Kat Güney', teacher: '' },
+                    { area: '4. Kat Kuzey', teacher: '' },
+                    { area: '4. Kat Güney', teacher: '' },
+                    { area: 'Bahçe Ön-Yan', teacher: 'Ayşe Demirbilek Yağmur' },
+                    { area: 'Bahçe Arka-Yan', teacher: 'Neslihan Öztürk' },
+                    { area: '-1. Kat', teacher: 'Mehmet Koç' }
+                ]
+            },
+            classPrograms: buildDefaultClassPrograms(),
+            notices: [
+                { tag: 'ÖNEMLİ', color: 'red', title: 'LGS & YKS Deneme Sınavı', desc: 'Cuma günü 09:00’da tüm 8 ve 12. sınıflar için genel deneme yapılacaktır.' },
+                { tag: 'ETKİNLİK', color: 'blue', title: 'STEM & Robotik Atölyesi', desc: 'Kodlama kulübü çalışmaları her Salı ve Perşembe 16:00’da laboratuvarda.' },
+                { tag: 'SPOR', color: 'teal', title: 'Okullar Arası Voleybol Turnuvası', desc: 'Okul takımımıza yarı final müsabakasında başarılar dileriz!' }
+            ],
+            tickerLines: [
+                'Cihangir Okulları Kayseri Merkez Kampüs’e hoş geldiniz! Verimli ve başarılı bir gün dileriz.',
+                'Kütüphanemiz hafta içi her gün 08:15 – 17:00 saatleri arasında tüm öğrencilerimize açıktır.',
+                'LGS ve YKS etüt programları için sınıf rehber öğretmeninizle görüşebilirsiniz.',
+                'Okul içi düzen ve çevre temizliği hepimizin ortak sorumluluğudur.'
+            ],
+            menuByDay: {
+                '1': { soup: 'Mercimek Çorbası', main: 'Fırın Tavuk & Patates', side: 'Pirinç Pilavı', extra: 'Ayran & Elma' },
+                '2': { soup: 'Ezogelin Çorbası', main: 'Izgara Köfte', side: 'Tereyağlı Makarna', extra: 'Mevsim Salata & Sütlaç' },
+                '3': { soup: 'Yayla Çorbası', main: 'Etli Kuru Fasulye', side: 'Şehriyeli Pilav', extra: 'Cacık & Mandalina' },
+                '4': { soup: 'Domates Çorbası', main: 'Sebzeli Tavuk Sote', side: 'Bulgur Pilavı', extra: 'Yoğurt & Muz' },
+                '5': { soup: 'Tarhana Çorbası', main: 'Kayseri Mantısı', side: 'Zeytinyağlı Fasulye', extra: 'Komposto & Kurabiye' }
+            }
+        };
+
+        // ==================== YARDIMCI FONKSİYONLAR ====================
+        function deepClone(obj) {
+            return JSON.parse(JSON.stringify(obj));
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function timeToMinutes(hhmm) {
+            const parts = String(hhmm || '00:00').split(':').map(Number);
+            return (parts[0] || 0) * 60 + (parts[1] || 0);
+        }
+
+        function formatCountdown(totalSec) {
+            const s = Math.max(0, Math.floor(totalSec));
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            if (h > 0) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+            }
+            return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+        }
+
+        function normalizeState(raw) {
+            const base = deepClone(DEFAULT_STATE);
+            if (!raw || typeof raw !== 'object') return base;
+            const merged = Object.assign(base, raw);
+            merged.autoDark = Object.assign(deepClone(DEFAULT_STATE.autoDark), raw.autoDark || {});
+            merged.simulation = Object.assign(deepClone(DEFAULT_STATE.simulation), raw.simulation || {});
+            if (!Array.isArray(merged.schedule) || merged.schedule.length === 0) merged.schedule = deepClone(DEFAULT_STATE.schedule);
+            if (!merged.dutyByDay || typeof merged.dutyByDay !== 'object') merged.dutyByDay = deepClone(DEFAULT_STATE.dutyByDay);
+            if (!merged.classPrograms || typeof merged.classPrograms !== 'object' || Object.keys(merged.classPrograms).length === 0) {
+                merged.classPrograms = deepClone(DEFAULT_STATE.classPrograms);
+            }
+            if (!Array.isArray(merged.notices) || merged.notices.length === 0) merged.notices = deepClone(DEFAULT_STATE.notices);
+            if (!Array.isArray(merged.tickerLines) || merged.tickerLines.length === 0) merged.tickerLines = deepClone(DEFAULT_STATE.tickerLines);
+            if (!merged.menuByDay || typeof merged.menuByDay !== 'object') merged.menuByDay = deepClone(DEFAULT_STATE.menuByDay);
+            return merged;
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) return normalizeState(JSON.parse(saved));
+            } catch (e) {}
+            return deepClone(DEFAULT_STATE);
+        }
+
+        let state = loadState();
+        let draftState = null;
+        let currentLiveWeatherCode = null;
+        let currentClassPage = 0;
+        let currentDutyPage = 0;
+        let currentSlideIdx = 0;
+        let activeRightPanel = 'notices'; // notices | news | menu | world
+        let lastFetchedDateKey = '';
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        // ==================== OKULA UYGUNLUK FİLTRESİ ====================
+        const BANNED_KEYWORDS = [
+            'manifest', 'crush', 'cinayet', 'katliam', 'terör', 'savaş', 'bomba', 'silah',
+            'saldırı', 'intihar', 'uyuşturucu', 'alkol', 'kumar', 'bahis', 'cinsel', 'taciz',
+            'şiddet', 'kanlı', 'ölüm', 'öldürüldü', 'tutuklandı', 'gözaltı', 'skandal', 'magazin',
+            'boşandı', 'aşk', 'sevgili', 'siyaset', 'parti', 'seçim', 'meclis', 'hükümet', 'darbe'
+        ];
+        const PREFERRED_KEYWORDS = [
+            'futbol', 'voleybol', 'basketbol', 'tenis', 'yüzme', 'atletizm', 'olimpiyat', 'şampiyon',
+            'millî takım', 'milli takım', 'turnuva', 'spor', 'stadyum', 'gol', 'madalya', 'rekor',
+            'doğa', 'orman', 'dağ', 'erciyes', 'okyanus', 'göl', 'nehir', 'ekosistem', 'millî park',
+            'milli park', 'yaban', 'gezegen', 'uzay', 'yıldız', 'güneş', 'iklim', 'bitki', 'kuş',
+            'müzik', 'senfoni', 'orkestra', 'piyano', 'keman', 'gitar', 'besteci', 'konser', 'türkü',
+            'enstrüman', 'koro', 'nota', 'sanat'
+        ];
+
+        function isSchoolSafe(text) {
+            const lower = String(text || '').toLocaleLowerCase('tr-TR');
+            return !BANNED_KEYWORDS.some(w => lower.includes(w));
+        }
+
+        function isPreferredTopic(text) {
+            const lower = String(text || '').toLocaleLowerCase('tr-TR');
+            return PREFERRED_KEYWORDS.some(w => lower.includes(w));
+        }
+
+        // ==================== YEDEK GÜNLÜK VİTRİN & HABER HAVUZU ====================
+        const FALLBACK_SLIDES = [
+            {
+                category: 'SPOR • TARİHTE BUGÜN',
+                title: 'Filenin Sultanları ve Türk Voleybolunun Yükselişi',
+                desc: 'Disiplin, takım ruhu ve azimle Avrupa ve Dünya sahnesinde kazanılan tarihi başarılar.',
+                image: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'DOĞA • KAYSERİ',
+                title: 'Erciyes Dağı ve İç Anadolu Ekosistemi',
+                desc: '3.917 metre yüksekliğiyle Erciyes, benzersiz florası ve doğal güzellikleriyle şehrimizin simgesidir.',
+                image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'MÜZİK & SANAT',
+                title: 'Müziğin Zihin ve Öğrenme Üzerindeki Gücü',
+                desc: 'Bir enstrüman çalmak veya klasik müzik dinlemek odaklanmayı, hafızayı ve yaratıcılığı güçlendirir.',
+                image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'SPOR DÜNYASI',
+                title: 'Fair-Play ve Takım Sporlarının Önemi',
+                desc: 'Futbol ve basketbol gibi takım sporları iş birliği, strateji ve saygı kültürünü geliştirir.',
+                image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'DOĞA & BİLİM',
+                title: 'Ormanlar: Gezegenimizin Yeşil Akciğerleri',
+                desc: 'Her yeni fidan, gelecek nesiller için daha temiz bir hava ve daha yaşanabilir bir dünya demektir.',
+                image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80'
+            }
+        ];
+
+        const FALLBACK_NEWS = [
+            { tag: 'SPOR', color: 'teal', title: 'Okul Sporları Sezonu Heyecanla Devam Ediyor', desc: 'Genç sporcular voleybol, basketbol ve atletizm branşlarında fair-play ruhuyla yarışıyor.' },
+            { tag: 'DOĞA', color: 'blue', title: 'Sonbahar ve Kış Göçmen Kuşları Sulak Alanlarda', desc: 'Sultan Sazlığı ve Anadolu sulak alanları yüzlerce kuş türüne ev sahipliği yapmaya devam ediyor.' },
+            { tag: 'MÜZİK', color: 'navy', title: 'Gençlik Senfoni ve Okul Koroları Buluşması', desc: 'Klasik ve geleneksel müzik eserleri genç müzisyenlerin performanslarıyla sahneye taşınıyor.' }
+        ];
+
+        let showcaseSlides = deepClone(FALLBACK_SLIDES);
+        let currentNewsItems = deepClone(FALLBACK_NEWS);
+
+        // ==================== CANLI HAVA DURUMU (KAYSERİ KOCASİNAN + 5 DÜNYA MERKEZİ) ====================
+        function decodeWmoWeather(code, isDay) {
+            if (code === 0) return { icon: isDay ? '☀️' : '🌙', text: isDay ? 'Açık' : 'Açık (Gece)', darkTrigger: false };
+            if (code === 1) return { icon: isDay ? '🌤️' : '🌙', text: 'Az Bulutlu', darkTrigger: false };
+            if (code === 2) return { icon: '⛅', text: 'Parçalı Bulutlu', darkTrigger: false };
+            if (code === 3) return { icon: '☁️', text: 'Bulutlu', darkTrigger: true };
+            if (code === 45 || code === 48) return { icon: '🌫️', text: 'Sisli', darkTrigger: true };
+            if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return { icon: '🌧️', text: 'Yağmurlu', darkTrigger: true };
+            if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { icon: '❄️', text: 'Karlı', darkTrigger: true };
+            if (code >= 95 && code <= 99) return { icon: '⛈️', text: 'Gök Gürültülü Sağanak', darkTrigger: true };
+            return { icon: '🌤️', text: 'Parçalı Bulutlu', darkTrigger: false };
+        }
+
+        async function fetchKayseriWeather() {
+            if (!state.weatherAuto) return;
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=38.758&longitude=35.483&current=temperature_2m,weather_code,is_day&timezone=Europe%2FIstanbul';
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (!data || !data.current) return;
+                const temp = Math.round(data.current.temperature_2m);
+                const code = data.current.weather_code;
+                const isDay = data.current.is_day === 1;
+                currentLiveWeatherCode = code;
+                const info = decodeWmoWeather(code, isDay);
+                state.weatherIcon = info.icon;
+                state.weatherText = `Kayseri Kocasinan • ${temp}°C • ${info.text}`;
+                renderHeaderStatic();
+                evaluateAutoTheme();
+            } catch (e) {}
+        }
+
+        async function fetchWorldCentersWeather() {
+            try {
+                const lats = WORLD_CENTERS.map(c => c.lat).join(',');
+                const lons = WORLD_CENTERS.map(c => c.lon).join(',');
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day`;
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const data = await res.json();
+                const list = Array.isArray(data) ? data : [data];
+                list.forEach((entry, idx) => {
+                    if (!WORLD_CENTERS[idx] || !entry || !entry.current) return;
+                    const info = decodeWmoWeather(entry.current.weather_code, entry.current.is_day === 1);
+                    WORLD_CENTERS[idx].icon = info.icon;
+                    WORLD_CENTERS[idx].temp = `${Math.round(entry.current.temperature_2m)}°C`;
+                    WORLD_CENTERS[idx].desc = info.text;
+                });
+                renderWorldCenters();
+            } catch (e) {}
+        }
+
+        // ==================== GÜNLÜK WIKIPEDIA + HABER AKIŞI ====================
+        async function fetchDailyShowcaseAndNews() {
+            const now = getEffectiveDate();
+            const yyyy = now.getFullYear();
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            const dateKey = `${yyyy}-${mm}-${dd}`;
+            lastFetchedDateKey = dateKey;
+
+            const collectedSlides = [];
+            try {
+                const wikiRes = await fetch(`https://tr.wikipedia.org/api/rest_v1/feed/featured/${yyyy}/${mm}/${dd}`);
+                if (wikiRes.ok) {
+                    const wiki = await wikiRes.json();
+                    if (wiki.image && wiki.image.image && wiki.image.image.source) {
+                        const descText = (wiki.image.description && wiki.image.description.text) ? wiki.image.description.text : 'Dünyadan seçkin doğa ve kültür karesi.';
+                        if (isSchoolSafe(descText)) {
+                            collectedSlides.push({
+                                category: 'GÜNÜN SEÇKİN GÖRSELİ',
+                                title: 'Dünyadan Günün Karesi',
+                                desc: descText.slice(0, 140),
+                                image: wiki.image.image.source
+                            });
+                        }
+                    }
+                    if (Array.isArray(wiki.onthisday)) {
+                        const safeEvents = wiki.onthisday.filter(ev => {
+                            const txt = `${ev.text || ''} ${(ev.pages && ev.pages[0] && ev.pages[0].title) || ''}`;
+                            return isSchoolSafe(txt) && isPreferredTopic(txt);
+                        });
+                        safeEvents.slice(0, 2).forEach(ev => {
+                            const p = ev.pages && ev.pages.find(pg => pg.thumbnail && pg.thumbnail.source);
+                            collectedSlides.push({
+                                category: `TARİHTE BUGÜN • ${ev.year || ''}`,
+                                title: (p && p.titles && p.titles.normalized) ? p.titles.normalized : 'Tarihte Bugün',
+                                desc: (ev.text || '').slice(0, 140),
+                                image: p ? p.thumbnail.source : FALLBACK_SLIDES[0].image
+                            });
+                        });
+                    }
+                }
+            } catch (e) {}
+
+            // Güncel Haberler (Spor, Doğa, Müzik - Sıkı Filtreli)
+            const rssFeeds = [
+                { tag: 'SPOR', color: 'teal', url: 'https://www.trthaber.com/spor_articles.rss' },
+                { tag: 'MÜZİK & SANAT', color: 'navy', url: 'https://www.trthaber.com/kultur_sanat_articles.rss' },
+                { tag: 'DOĞA & BİLİM', color: 'blue', url: 'https://www.trthaber.com/bilim_teknoloji_articles.rss' }
+            ];
+            const fetchedNews = [];
+            for (const feed of rssFeeds) {
+                try {
+                    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
+                    const r = await fetch(api);
+                    if (!r.ok) continue;
+                    const j = await r.json();
+                    if (j.status === 'ok' && Array.isArray(j.items)) {
+                        const safeItem = j.items.find(it => isSchoolSafe(`${it.title} ${it.description}`));
+                        if (safeItem) {
+                            const cleanDesc = String(safeItem.description || '').replace(/<[^>]+>/g, '').trim();
+                            fetchedNews.push({
+                                tag: feed.tag,
+                                color: feed.color,
+                                title: safeItem.title,
+                                desc: cleanDesc.slice(0, 120) || 'Güncel gelişme detayları.'
+                            });
+                            if (safeItem.thumbnail && collectedSlides.length < 5) {
+                                collectedSlides.push({
+                                    category: `GÜNCEL • ${feed.tag}`,
+                                    title: safeItem.title,
+                                    desc: cleanDesc.slice(0, 130),
+                                    image: safeItem.thumbnail
+                                });
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            if (fetchedNews.length > 0) {
+                currentNewsItems = fetchedNews.slice(0, 3);
+            } else {
+                currentNewsItems = deepClone(FALLBACK_NEWS);
+            }
+
+            if (collectedSlides.length >= 2) {
+                showcaseSlides = collectedSlides;
+            } else {
+                const dayOffset = now.getDate() % FALLBACK_SLIDES.length;
+                const rotated = FALLBACK_SLIDES.slice(dayOffset).concat(FALLBACK_SLIDES.slice(0, dayOffset));
+                showcaseSlides = collectedSlides.concat(rotated).slice(0, 5);
+            }
+
+            currentSlideIdx = 0;
+            renderSlide();
+            renderNewsList();
+        }
+
+        // ==================== TEMA & OTOMATİK KARANLIK MOD ====================
+        function applyTheme(mode) {
+            if (mode === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function isWeatherDarkTrigger() {
+            if (currentLiveWeatherCode !== null) {
+                return decodeWmoWeather(currentLiveWeatherCode, true).darkTrigger;
+            }
+            const txt = `${state.weatherIcon} ${state.weatherText}`.toLocaleLowerCase('tr-TR');
+            return ['bulutlu', 'yağmur', 'sağanak', 'gök gürültü', 'sis', 'kar', '☁️', '🌧️', '⛈️', '❄️'].some(k => {
+                if (k === 'bulutlu' && (txt.includes('az bulutlu') || txt.includes('parçalı bulutlu'))) return false;
+                return txt.includes(k);
+            });
+        }
+
+        function isTimeInDarkRange(now) {
+            const cur = now.getHours() * 60 + now.getMinutes();
+            const start = timeToMinutes(state.autoDark.startTime || '17:30');
+            const end = timeToMinutes(state.autoDark.endTime || '07:30');
+            if (start === end) return false;
+            if (start > end) {
+                return cur >= start || cur < end;
+            }
+            return cur >= start && cur < end;
+        }
+
+        function evaluateAutoTheme() {
+            if (!state.autoDark || !state.autoDark.enabled) {
+                applyTheme(state.theme);
+                return;
+            }
+            const now = getEffectiveDate();
+            let shouldBeDark = false;
+            if (state.autoDark.byWeather && isWeatherDarkTrigger()) shouldBeDark = true;
+            if (state.autoDark.byTime && isTimeInDarkRange(now)) shouldBeDark = true;
+            applyTheme(shouldBeDark ? 'dark' : 'light');
+        }
+
+        // ==================== SAAT & SİMÜLASYON ====================
+        function getEffectiveDate() {
+            const real = new Date();
+            if (state.simulation && state.simulation.enabled) {
+                const d = new Date(real);
+                const targetDay = Number(state.simulation.dayIdx) || 1;
+                const diff = targetDay - d.getDay();
+                d.setDate(d.getDate() + diff);
+                const [hh, mm] = String(state.simulation.time || '09:15').split(':').map(Number);
+                d.setHours(hh || 0, mm || 0, real.getSeconds(), 0);
+                return d;
+            }
+            return real;
+        }
+
+        // ==================== RENDER FONKSİYONLARI ====================
+        function renderHeaderStatic() {
+            document.getElementById('header-school-name').textContent = state.schoolName || 'CİHANGİR OKULLARI';
+            document.getElementById('header-school-subtitle').textContent = state.schoolSubtitle || 'Kayseri Merkez Kampüs';
+            document.getElementById('header-weather-icon').textContent = state.weatherIcon || '🌤️';
+            document.getElementById('header-weather-text').textContent = state.weatherText || 'Kayseri Kocasinan';
+            document.getElementById('sim-badge').classList.toggle('hidden', !(state.simulation && state.simulation.enabled));
+            document.getElementById('app-version-text').textContent = formatAppVersion();
+
+            const logoSvg = document.getElementById('header-logo-svg');
+            const logoImg = document.getElementById('header-logo-img');
+            if (state.customLogo) {
+                logoImg.src = state.customLogo;
+                logoImg.classList.remove('hidden');
+                logoSvg.classList.add('hidden');
+            } else {
+                logoImg.classList.add('hidden');
+                logoSvg.classList.remove('hidden');
+            }
+        }
+
+        function renderTicker() {
+            const lines = (state.tickerLines && state.tickerLines.length) ? state.tickerLines : DEFAULT_STATE.tickerLines;
+            const segment = lines.map(t => `<span class="inline-flex items-center mx-6"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal mr-3"></span>${escapeHtml(t)}</span>`).join('');
+            document.getElementById('ticker-track').innerHTML = segment + segment;
+        }
+
+        function renderSlide() {
+            if (!showcaseSlides.length) return;
+            const slide = showcaseSlides[currentSlideIdx % showcaseSlides.length];
+            const imgEl = document.getElementById('slide-image');
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = slide.image || '';
+                imgEl.onerror = () => { imgEl.style.opacity = '0'; };
+                imgEl.onload = () => { imgEl.style.opacity = '1'; };
+            }, 150);
+
+            document.getElementById('slide-category').textContent = slide.category || 'GÜNÜN BİLGİSİ';
+            document.getElementById('slide-title').textContent = slide.title || '';
+            document.getElementById('slide-desc').textContent = slide.desc || '';
+
+            const dotsEl = document.getElementById('slide-dots');
+            dotsEl.innerHTML = showcaseSlides.map((_, idx) => {
+                const active = idx === (currentSlideIdx % showcaseSlides.length);
+                return `<button type="button" data-slide="${idx}" class="h-1.5 rounded-full transition-all ${active ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'}"></button>`;
+            }).join('');
+            dotsEl.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentSlideIdx = Number(btn.dataset.slide);
+                    renderSlide();
+                });
+            });
+        }
+
+        function computeBellStatus(now) {
+            const day = now.getDay();
+            const secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const sched = state.schedule || [];
+
+            if (day === 0 || day === 6 || sched.length === 0) {
+                return { type: 'off', label: 'HAFTA SONU', range: 'Tatil', countdown: '--:--', sub: 'İyi tatiller dileriz', next: 'Pazartesi görüşmek üzere', pct: 100, activePeriodIdx: -1 };
+            }
+
+            const firstStart = timeToMinutes(sched[0].start) * 60;
+            const lastEnd = timeToMinutes(sched[sched.length - 1].end) * 60;
+
+            if (secNow < firstStart) {
+                const rem = firstStart - secNow;
+                return {
+                    type: 'before', label: 'OKUL ÖNCESİ', range: `${sched[0].start} Başlangıç`,
+                    countdown: formatCountdown(rem), sub: '1. Derse kalan süre',
+                    next: `Sıradaki: ${sched[0].name} • ${sched[0].start}`, pct: 0, activePeriodIdx: 0
+                };
+            }
+
+            if (secNow >= lastEnd) {
+                return {
+                    type: 'after', label: 'DERSLER BİTTİ', range: `${sched[sched.length - 1].end} Çıkış`,
+                    countdown: '00:00', sub: 'Bugünkü dersler tamamlandı',
+                    next: 'İyi akşamlar dileriz', pct: 100, activePeriodIdx: -1
+                };
+            }
+
+            for (let i = 0; i < sched.length; i++) {
+                const sSec = timeToMinutes(sched[i].start) * 60;
+                const eSec = timeToMinutes(sched[i].end) * 60;
+                if (secNow >= sSec && secNow < eSec) {
+                    const rem = eSec - secNow;
+                    const pct = Math.min(100, Math.max(0, Math.round(((secNow - sSec) / (eSec - sSec)) * 100)));
+                    const nextItem = sched[i + 1];
+                    const isLunchNext = nextItem && (timeToMinutes(nextItem.start) - timeToMinutes(sched[i].end) >= 30);
+                    return {
+                        type: 'lesson', label: sched[i].name.toUpperCase(), range: `${sched[i].start} - ${sched[i].end}`,
+                        countdown: formatCountdown(rem), sub: isLunchNext ? 'Öğle arasına kalan süre' : 'Teneffüse kalan süre',
+                        next: nextItem ? `Sıradaki: ${isLunchNext ? 'Öğle Arası' : 'Teneffüs'} • ${sched[i].end}` : `Çıkış Zili • ${sched[i].end}`,
+                        pct, activePeriodIdx: i
+                    };
+                }
+                if (i < sched.length - 1) {
+                    const nextStart = timeToMinutes(sched[i + 1].start) * 60;
+                    if (secNow >= eSec && secNow < nextStart) {
+                        const rem = nextStart - secNow;
+                        const isLunch = (nextStart - eSec) >= 1800;
+                        const pct = Math.min(100, Math.max(0, Math.round(((secNow - eSec) / (nextStart - eSec)) * 100)));
+                        return {
+                            type: 'break', label: isLunch ? 'ÖĞLE ARASI' : 'TENEFFÜS', range: `${sched[i].end} - ${sched[i + 1].start}`,
+                            countdown: formatCountdown(rem), sub: `${sched[i + 1].name} ziline kalan`,
+                            next: `Sıradaki: ${sched[i + 1].name} • ${sched[i + 1].start}`,
+                            pct, activePeriodIdx: i + 1
+                        };
+                    }
+                }
+            }
+            return { type: 'off', label: 'OKUL DIŞI', range: '--:--', countdown: '--:--', sub: '', next: '', pct: 0, activePeriodIdx: -1 };
+        }
+
+        function renderBellAndSchedule(now) {
+            const st = computeBellStatus(now);
+            document.getElementById('bell-status-label').textContent = st.label;
+            document.getElementById('bell-range-label').textContent = st.range;
+            document.getElementById('bell-countdown').textContent = st.countdown;
+            document.getElementById('bell-sub-label').textContent = st.sub;
+            document.getElementById('bell-next-line').textContent = st.next;
+            document.getElementById('bell-pct').textContent = `%${st.pct}`;
+            document.getElementById('bell-progress-bar').style.width = `${st.pct}%`;
+
+            const dot = document.getElementById('bell-status-dot');
+            dot.className = `w-1.5 h-1.5 rounded-full animate-pulse ${st.type === 'break' ? 'bg-amber-400' : (st.type === 'lesson' ? 'bg-brand-teal' : 'bg-slate-400')}`;
+
+            // Ders saatleri listesi
+            const secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const listEl = document.getElementById('schedule-list');
+            listEl.innerHTML = (state.schedule || []).map((item, idx) => {
+                const sSec = timeToMinutes(item.start) * 60;
+                const eSec = timeToMinutes(item.end) * 60;
+                const isActive = st.type === 'lesson' && st.activePeriodIdx === idx;
+                const isPast = (now.getDay() >= 1 && now.getDay() <= 5) && secNow >= eSec;
+                return `
+                    <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition ${
+                        isActive
+                            ? 'bg-brand-blue text-white font-bold shadow-sm'
+                            : (isPast
+                                ? 'bg-slate-50/70 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500'
+                                : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 font-semibold')
+                    }">
+                        <span class="flex items-center gap-2 truncate">
+                            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : (isPast ? 'bg-slate-300 dark:bg-slate-600' : 'bg-brand-teal')}"></span>
+                            ${escapeHtml(item.name)}
+                        </span>
+                        <span class="tabular-nums font-mono text-[11px] ${isActive ? 'text-blue-100' : ''}">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            return st;
+        }
+
+        function renderClassesGrid(now, bellStatus) {
+            const classNames = Object.keys(state.classPrograms || {});
+            const perPage = 4;
+            const totalPages = Math.max(1, Math.ceil(classNames.length / perPage));
+            currentClassPage = currentClassPage % totalPages;
+
+            const dayKey = String((now.getDay() >= 1 && now.getDay() <= 5) ? now.getDay() : 1);
+            const periodIdx = bellStatus.activePeriodIdx >= 0 ? bellStatus.activePeriodIdx : 0;
+            const periodName = (state.schedule[periodIdx] && state.schedule[periodIdx].name) ? state.schedule[periodIdx].name : '1. Ders';
+
+            document.getElementById('timetable-period-badge').textContent = bellStatus.type === 'break' ? `Sıradaki: ${periodName}` : periodName;
+            document.getElementById('timetable-page-indicator').textContent = `Sayfa ${currentClassPage + 1}/${totalPages}`;
+
+            const slice = classNames.slice(currentClassPage * perPage, currentClassPage * perPage + perPage);
+            const grid = document.getElementById('classes-grid');
+            grid.innerHTML = slice.map(cls => {
+                const dayArr = (state.classPrograms[cls] && state.classPrograms[cls][dayKey]) || [];
+                const lesson = dayArr[periodIdx] || { subject: 'Serbest Çalışma', teacher: '-' };
+                return `
+                    <div class="rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/80 dark:border-slate-800 p-3 flex flex-col justify-between min-w-0">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-2 py-0.5 rounded-lg bg-brand-navy dark:bg-brand-blue text-white font-display font-extrabold text-xs">${escapeHtml(cls)}</span>
+                            <span class="w-2 h-2 rounded-full bg-brand-teal shrink-0"></span>
+                        </div>
+                        <div class="mt-1.5 min-w-0">
+                            <div class="font-display font-bold text-sm text-brand-navy dark:text-white truncate">${escapeHtml(lesson.subject || '-')}</div>
+                            <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 truncate">${escapeHtml(lesson.teacher || '-')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderDutyCard(now) {
+            const rawDay = now.getDay();
+            const dayKey = String((rawDay >= 1 && rawDay <= 5) ? rawDay : 1);
+            const dayName = DAYS_TR[Number(dayKey)];
+            document.getElementById('duty-day-badge').textContent = `${dayName} Nöbeti`;
+
+            const list = (state.dutyByDay && state.dutyByDay[dayKey]) ? state.dutyByDay[dayKey] : [];
+            const perPage = 8;
+            const totalPages = Math.max(1, Math.ceil(list.length / perPage));
+            currentDutyPage = currentDutyPage % totalPages;
+
+            const pageBtn = document.getElementById('duty-page-indicator');
+            if (totalPages > 1) {
+                pageBtn.classList.remove('hidden');
+                pageBtn.textContent = `${currentDutyPage + 1}/${totalPages}`;
+            } else {
+                pageBtn.classList.add('hidden');
+            }
+
+            const slice = list.slice(currentDutyPage * perPage, currentDutyPage * perPage + perPage);
+            const container = document.getElementById('duty-teachers-list');
+            container.innerHTML = slice.map(item => `
+                <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 text-xs">
+                    <span class="font-bold text-slate-600 dark:text-slate-300 truncate">${escapeHtml(item.area)}</span>
+                    <span class="font-semibold text-brand-navy dark:text-white truncate text-right">${escapeHtml(item.teacher || '—')}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderNoticesList() {
+            const colorMap = {
+                red:  { badge: 'bg-brand-red/15 text-brand-red dark:bg-red-500/20 dark:text-red-300', border: 'border-l-brand-red' },
+                blue: { badge: 'bg-brand-blue/15 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300', border: 'border-l-brand-blue' },
+                teal: { badge: 'bg-brand-teal/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300', border: 'border-l-brand-teal' },
+                navy: { badge: 'bg-slate-200 text-brand-navy dark:bg-slate-700 dark:text-slate-200', border: 'border-l-brand-navy dark:border-l-brand-blue' }
+            };
+            const el = document.getElementById('campus-notices-list');
+            el.innerHTML = (state.notices || []).slice(0, 3).map(n => {
+                const c = colorMap[n.color] || colorMap.blue;
+                return `
+                    <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 border-l-4 ${c.border} min-w-0">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${c.badge} shrink-0">${escapeHtml(n.tag)}</span>
+                            <h4 class="font-display font-bold text-xs text-brand-navy dark:text-white truncate">${escapeHtml(n.title)}</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 dark:text-slate-300 truncate">${escapeHtml(n.desc)}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderNewsList() {
+            const colorMap = {
+                teal: 'bg-brand-teal/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+                blue: 'bg-brand-blue/15 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300',
+                navy: 'bg-slate-200 text-brand-navy dark:bg-slate-700 dark:text-slate-200'
+            };
+            const el = document.getElementById('current-news-list');
+            el.innerHTML = (currentNewsItems || []).slice(0, 3).map(n => `
+                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 min-w-0">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${colorMap[n.color] || colorMap.blue} shrink-0">${escapeHtml(n.tag)}</span>
+                        <h4 class="font-display font-bold text-xs text-brand-navy dark:text-white truncate">${escapeHtml(n.title)}</h4>
+                    </div>
+                    <p class="text-[11px] text-slate-600 dark:text-slate-300 truncate">${escapeHtml(n.desc)}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderDailyMenu(now) {
+            const rawDay = now.getDay();
+            const dayKey = String((rawDay >= 1 && rawDay <= 5) ? rawDay : 1);
+            const m = (state.menuByDay && state.menuByDay[dayKey]) || DEFAULT_STATE.menuByDay['1'];
+            const rows = [
+                { icon: '🍲', label: 'Çorba', val: m.soup },
+                { icon: '🍽️', label: 'Ana Yemek', val: m.main },
+                { icon: '🍚', label: 'Yardımcı', val: m.side },
+                { icon: '🥤', label: 'Tatlı / İçecek', val: m.extra }
+            ];
+            document.getElementById('daily-menu-panel').innerHTML = rows.map(r => `
+                <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 text-xs">
+                    <span class="font-bold text-slate-500 dark:text-slate-300 flex items-center gap-1.5 shrink-0">${r.icon} ${r.label}</span>
+                    <span class="font-bold text-brand-navy dark:text-white truncate text-right">${escapeHtml(r.val || '-')}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderWorldCenters() {
+            const now = new Date();
+            const container = document.getElementById('world-centers-panel');
+            container.innerHTML = WORLD_CENTERS.map((c, idx) => {
+                let localTime = '--:--';
+                try {
+                    localTime = new Intl.DateTimeFormat('tr-TR', {
+                        timeZone: c.tz,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }).format(now);
+                } catch (e) {}
+                const isFirst = idx === 0;
+                return `
+                    <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl ${
+                        isFirst
+                            ? 'bg-brand-blue/10 dark:bg-brand-blue/20 border border-brand-blue/30'
+                            : 'bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800'
+                    } text-xs min-w-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-sm leading-none shrink-0">${c.flag}</span>
+                            <span class="font-display font-bold ${isFirst ? 'text-brand-blue dark:text-blue-300' : 'text-brand-navy dark:text-white'} truncate">${escapeHtml(c.name)}</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 shrink-0">
+                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                                <span>${c.icon}</span>
+                                <span class="tabular-nums">${escapeHtml(c.temp)}</span>
+                            </span>
+                            <span class="font-mono font-extrabold text-xs px-2 py-0.5 rounded-md bg-white dark:bg-[#141928] text-brand-navy dark:text-white border border-slate-200/80 dark:border-slate-700 tabular-nums">
+                                ${localTime}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setRightPanel(panel) {
+            activeRightPanel = panel;
+            const panels = {
+                notices: { btn: 'btn-panel-notices', box: 'campus-notices-list', dot: 'bg-brand-red' },
+                news:    { btn: 'btn-panel-news',    box: 'current-news-list',   dot: 'bg-brand-blue' },
+                menu:    { btn: 'btn-panel-menu',    box: 'daily-menu-panel',    dot: 'bg-brand-teal' },
+                world:   { btn: 'btn-panel-world',   box: 'world-centers-panel', dot: 'bg-amber-500' }
+            };
+            Object.keys(panels).forEach(key => {
+                const p = panels[key];
+                const btn = document.getElementById(p.btn);
+                const box = document.getElementById(p.box);
+                const isActive = key === panel;
+                box.classList.toggle('hidden', !isActive);
+                if (isActive) {
+                    btn.className = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-brand-navy text-white dark:bg-brand-blue transition whitespace-nowrap shrink-0';
+                    document.getElementById('notices-news-dot').className = `w-2 h-2 rounded-full ${p.dot} shrink-0`;
+                } else {
+                    btn.className = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0';
+                }
+            });
+            if (panel === 'world') renderWorldCenters();
+        }
+
+        // ==================== ANA DÖNGÜ ====================
+        function tickBoard() {
+            const now = getEffectiveDate();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('header-clock').textContent = `${hh}:${mm}:${ss}`;
+            document.getElementById('header-date').textContent = `${now.getDate()} ${MONTHS_TR[now.getMonth()]} ${DAYS_TR[now.getDay()]}`;
+
+            const bellStatus = renderBellAndSchedule(now);
+            renderClassesGrid(now, bellStatus);
+            renderDutyCard(now);
+            renderDailyMenu(now);
+            if (activeRightPanel === 'world') renderWorldCenters();
+            evaluateAutoTheme();
+
+            const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            if (lastFetchedDateKey && dateKey !== lastFetchedDateKey) {
+                fetchDailyShowcaseAndNews();
+            }
+        }
+
+        // ==================== QR KOD KORUMA SİSTEMİ ====================
+        let currentQrPin = '';
+        let qrSecondsLeft = 120;
+        let qrTimerInterval = null;
+
+        function generateQrChallenge() {
+            currentQrPin = String(Math.floor(10000 + Math.random() * 90000));
+            qrSecondsLeft = 120;
+            document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrSecondsLeft} sn`;
+            document.getElementById('qr-pin-error').classList.add('hidden');
+            const pinInput = document.getElementById('inp-qr-pin');
+            pinInput.value = '';
+
+            const qrBox = document.getElementById('qr-code-container');
+            qrBox.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrBox, {
+                    text: `Cihangir Okullari Pano Kodu: ${currentQrPin}`,
+                    width: 172,
+                    height: 172,
+                    colorDark: '#1B2033',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } else {
+                qrBox.innerHTML = `<div class="text-xs font-mono font-bold text-slate-700 p-2">Kod: ${currentQrPin}</div>`;
+            }
+
+            clearInterval(qrTimerInterval);
+            qrTimerInterval = setInterval(() => {
+                qrSecondsLeft--;
+                if (qrSecondsLeft <= 0) {
+                    generateQrChallenge();
+                } else {
+                    document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrSecondsLeft} sn`;
+                }
+            }, 1000);
+        }
+
+        function openQrLockModal() {
+            document.getElementById('qr-lock-modal').classList.remove('hidden');
+            generateQrChallenge();
+            setTimeout(() => document.getElementById('inp-qr-pin').focus(), 100);
+        }
+
+        function closeQrLockModal() {
+            clearInterval(qrTimerInterval);
+            document.getElementById('qr-lock-modal').classList.add('hidden');
+        }
+
+        function verifyQrPin() {
+            const val = document.getElementById('inp-qr-pin').value.trim();
+            if (val.toLowerCase() === ADMIN_MASTER_CODE || val === currentQrPin) {
+                closeQrLockModal();
+                openSettingsModal();
+            } else {
+                document.getElementById('qr-pin-error').classList.remove('hidden');
+            }
+        }
+
+        // ==================== AYARLAR MODALI ====================
+        function switchModalTab(tabName) {
+            document.querySelectorAll('.modal-tab').forEach(btn => {
+                const active = btn.dataset.tab === tabName;
+                btn.classList.toggle('border-brand-blue', active);
+                btn.classList.toggle('text-brand-blue', active);
+                btn.classList.toggle('border-transparent', !active);
+            });
+            document.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.toggle('hidden', p.id !== `tab-${tabName}`);
+            });
+        }
+
+        function renderModalDutyEditor() {
+            const dayKey = document.getElementById('inp-duty-day-select').value;
+            const list = draftState.dutyByDay[dayKey] || [];
+            const container = document.getElementById('modal-duty-editor');
+            container.innerHTML = list.map((item, idx) => `
+                <div class="grid grid-cols-12 gap-2 items-center">
+                    <input type="text" data-duty-field="area" data-idx="${idx}" value="${escapeHtml(item.area)}" placeholder="Nöbet Yeri"
+                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                    <input type="text" data-duty-field="teacher" data-idx="${idx}" value="${escapeHtml(item.teacher)}" placeholder="Nöbetçi Öğretmen"
+                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <button type="button" data-duty-del="${idx}" class="col-span-2 py-2 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-500/15 dark:hover:bg-red-500/25 text-brand-red dark:text-red-300 text-xs font-bold transition">Sil</button>
+                </div>
+            `).join('');
+
+            container.querySelectorAll('input[data-duty-field]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    const i = Number(inp.dataset.idx);
+                    draftState.dutyByDay[dayKey][i][inp.dataset.dutyField] = inp.value;
+                });
+            });
+            container.querySelectorAll('button[data-duty-del]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    draftState.dutyByDay[dayKey].splice(Number(btn.dataset.dutyDel), 1);
+                    renderModalDutyEditor();
+                });
+            });
+        }
+
+        function renderModalScheduleEditor() {
+            const container = document.getElementById('modal-schedule-editor');
+            container.innerHTML = (draftState.schedule || []).map((item, idx) => `
+                <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs font-bold w-14 shrink-0 text-slate-600 dark:text-slate-300">${escapeHtml(item.name)}</span>
+                    <input type="time" data-sched-field="start" data-idx="${idx}" value="${escapeHtml(item.start)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="time" data-sched-field="end" data-idx="${idx}" value="${escapeHtml(item.end)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                </div>
+            `).join('');
+            container.querySelectorAll('input[data-sched-field]').forEach(inp => {
+                inp.addEventListener('change', () => {
+                    draftState.schedule[Number(inp.dataset.idx)][inp.dataset.schedField] = inp.value;
+                });
+            });
+        }
+
+        function renderModalClassSelect() {
+            const sel = document.getElementById('inp-class-select');
+            const prev = sel.value;
+            const names = Object.keys(draftState.classPrograms || {});
+            sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+            if (names.includes(prev)) sel.value = prev;
+            renderModalClassLessonsEditor();
+        }
+
+        function renderModalClassLessonsEditor() {
+            const cls = document.getElementById('inp-class-select').value;
+            const dayKey = document.getElementById('inp-class-day-select').value;
+            const container = document.getElementById('modal-class-lessons-editor');
+            if (!cls || !draftState.classPrograms[cls]) {
+                container.innerHTML = '<div class="text-xs text-slate-500">Önce bir şube ekleyin.</div>';
+                return;
+            }
+            if (!draftState.classPrograms[cls][dayKey]) {
+                draftState.classPrograms[cls][dayKey] = Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }));
+            }
+            const lessons = draftState.classPrograms[cls][dayKey];
+            while (lessons.length < (draftState.schedule.length || 8)) {
+                lessons.push({ subject: '', teacher: '' });
+            }
+
+            container.innerHTML = lessons.map((l, idx) => `
+                <div class="grid grid-cols-12 gap-2 items-center">
+                    <span class="col-span-2 text-xs font-bold text-slate-500 dark:text-slate-300">${idx + 1}. Ders</span>
+                    <input type="text" data-cls-field="subject" data-idx="${idx}" value="${escapeHtml(l.subject)}" placeholder="Ders Adı"
+                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                    <input type="text" data-cls-field="teacher" data-idx="${idx}" value="${escapeHtml(l.teacher)}" placeholder="Öğretmen"
+                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                </div>
+            `).join('');
+
+            container.querySelectorAll('input[data-cls-field]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    draftState.classPrograms[cls][dayKey][Number(inp.dataset.idx)][inp.dataset.clsField] = inp.value;
+                });
+            });
+        }
+
+        function renderModalNoticesEditor() {
+            const container = document.getElementById('modal-notices-editor');
+            container.innerHTML = (draftState.notices || []).map((n, idx) => `
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="text" data-notice-field="tag" data-idx="${idx}" value="${escapeHtml(n.tag)}" placeholder="Etiket"
+                            class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                        <input type="text" data-notice-field="title" data-idx="${idx}" value="${escapeHtml(n.title)}" placeholder="Başlık"
+                            class="col-span-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                    </div>
+                    <input type="text" data-notice-field="desc" data-idx="${idx}" value="${escapeHtml(n.desc)}" placeholder="Açıklama"
+                        class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs">
+                </div>
+            `).join('');
+            container.querySelectorAll('input[data-notice-field]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    draftState.notices[Number(inp.dataset.idx)][inp.dataset.noticeField] = inp.value;
+                });
+            });
+        }
+
+        function renderModalMenuEditor() {
+            const dayKey = document.getElementById('inp-menu-day-select').value;
+            const m = draftState.menuByDay[dayKey] || { soup: '', main: '', side: '', extra: '' };
+            document.getElementById('inp-menu-soup').value = m.soup || '';
+            document.getElementById('inp-menu-main').value = m.main || '';
+            document.getElementById('inp-menu-side').value = m.side || '';
+            document.getElementById('inp-menu-extra').value = m.extra || '';
+        }
+
+        function updateModalLogoPreview() {
+            const img = document.getElementById('preview-logo-img');
+            const svg = document.getElementById('preview-logo-svg');
+            if (draftState.customLogo) {
+                img.src = draftState.customLogo;
+                img.classList.remove('hidden');
+                svg.classList.add('hidden');
+            } else {
+                img.classList.add('hidden');
+                svg.classList.remove('hidden');
+            }
+        }
+
+        function openSettingsModal() {
+            draftState = deepClone(state);
+            document.getElementById('inp-school-name').value = draftState.schoolName || '';
+            document.getElementById('inp-school-subtitle').value = draftState.schoolSubtitle || '';
+            document.getElementById('inp-weather-auto').checked = !!draftState.weatherAuto;
+            document.getElementById('inp-weather-icon').value = draftState.weatherIcon || '🌤️';
+            document.getElementById('inp-weather-text').value = draftState.weatherText || '';
+            document.getElementById('inp-autodark-enabled').checked = !!(draftState.autoDark && draftState.autoDark.enabled);
+            document.getElementById('inp-autodark-weather').checked = !!(draftState.autoDark && draftState.autoDark.byWeather);
+            document.getElementById('inp-autodark-time').checked = !!(draftState.autoDark && draftState.autoDark.byTime);
+            document.getElementById('inp-autodark-start').value = (draftState.autoDark && draftState.autoDark.startTime) || '17:30';
+            document.getElementById('inp-autodark-end').value = (draftState.autoDark && draftState.autoDark.endTime) || '07:30';
+            document.getElementById('inp-qr-protection').checked = !!draftState.qrProtection;
+            document.getElementById('inp-ticker-lines').value = (draftState.tickerLines || []).join('\n');
+            document.getElementById('inp-sim-enabled').checked = !!(draftState.simulation && draftState.simulation.enabled);
+            document.getElementById('inp-sim-day').value = String((draftState.simulation && draftState.simulation.dayIdx) || 3);
+            document.getElementById('inp-sim-time').value = (draftState.simulation && draftState.simulation.time) || '09:15';
+
+            updateModalLogoPreview();
+            renderModalDutyEditor();
+            renderModalScheduleEditor();
+            renderModalClassSelect();
+            renderModalNoticesEditor();
+            renderModalMenuEditor();
+            switchModalTab('general');
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+            draftState = null;
+        }
+
+        // ==================== OLAY DİNLEYİCİLERİ ====================
+        document.getElementById('btn-theme').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            state.theme = isDark ? 'light' : 'dark';
+            state.autoDark.enabled = false;
+            saveState();
+            applyTheme(state.theme);
+        });
+
+        document.getElementById('btn-fullscreen').addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        });
+
+        document.getElementById('btn-settings').addEventListener('click', () => {
+            if (state.qrProtection) {
+                openQrLockModal();
+            } else {
+                openSettingsModal();
+            }
+        });
+
+        document.getElementById('btn-close-qr-modal').addEventListener('click', closeQrLockModal);
+        document.getElementById('btn-cancel-qr').addEventListener('click', closeQrLockModal);
+        document.getElementById('btn-refresh-qr').addEventListener('click', generateQrChallenge);
+        document.getElementById('btn-verify-qr').addEventListener('click', verifyQrPin);
+        document.getElementById('inp-qr-pin').addEventListener('input', (e) => {
+            const v = e.target.value.trim();
+            if (v === currentQrPin || v.toLowerCase() === ADMIN_MASTER_CODE) {
+                verifyQrPin();
+            }
+        });
+        document.getElementById('inp-qr-pin').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') verifyQrPin();
+        });
+
+        document.getElementById('btn-close-modal').addEventListener('click', closeSettingsModal);
+        document.getElementById('btn-cancel-modal').addEventListener('click', closeSettingsModal);
+
+        document.querySelectorAll('.modal-tab').forEach(btn => {
+            btn.addEventListener('click', () => switchModalTab(btn.dataset.tab));
+        });
+
+        document.getElementById('inp-duty-day-select').addEventListener('change', renderModalDutyEditor);
+        document.getElementById('btn-add-duty-area').addEventListener('click', () => {
+            const area = document.getElementById('inp-new-duty-area').value.trim();
+            const teacher = document.getElementById('inp-new-duty-teacher').value.trim();
+            const allDays = document.getElementById('inp-new-duty-all-days').checked;
+            if (!area) return;
+            if (allDays) {
+                for (let d = 1; d <= 5; d++) {
+                    const k = String(d);
+                    if (!draftState.dutyByDay[k]) draftState.dutyByDay[k] = [];
+                    draftState.dutyByDay[k].push({ area, teacher: k === document.getElementById('inp-duty-day-select').value ? teacher : '' });
+                }
+            } else {
+                const k = document.getElementById('inp-duty-day-select').value;
+                if (!draftState.dutyByDay[k]) draftState.dutyByDay[k] = [];
+                draftState.dutyByDay[k].push({ area, teacher });
+            }
+            document.getElementById('inp-new-duty-area').value = '';
+            document.getElementById('inp-new-duty-teacher').value = '';
+            renderModalDutyEditor();
+        });
+
+        document.getElementById('inp-class-select').addEventListener('change', renderModalClassLessonsEditor);
+        document.getElementById('inp-class-day-select').addEventListener('change', renderModalClassLessonsEditor);
+        document.getElementById('btn-add-class').addEventListener('click', () => {
+            const name = document.getElementById('inp-new-class-name').value.trim().toUpperCase();
+            if (!name || draftState.classPrograms[name]) return;
+            draftState.classPrograms[name] = {};
+            for (let d = 1; d <= 5; d++) {
+                draftState.classPrograms[name][String(d)] = Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }));
+            }
+            document.getElementById('inp-new-class-name').value = '';
+            renderModalClassSelect();
+            document.getElementById('inp-class-select').value = name;
+            renderModalClassLessonsEditor();
+        });
+        document.getElementById('btn-delete-class').addEventListener('click', () => {
+            const sel = document.getElementById('inp-class-select').value;
+            if (!sel || Object.keys(draftState.classPrograms).length <= 1) return;
+            delete draftState.classPrograms[sel];
+            renderModalClassSelect();
+        });
+
+        document.getElementById('inp-menu-day-select').addEventListener('change', renderModalMenuEditor);
+        ['soup', 'main', 'side', 'extra'].forEach(field => {
+            document.getElementById(`inp-menu-${field}`).addEventListener('input', (e) => {
+                const dayKey = document.getElementById('inp-menu-day-select').value;
+                if (!draftState.menuByDay[dayKey]) draftState.menuByDay[dayKey] = { soup: '', main: '', side: '', extra: '' };
+                draftState.menuByDay[dayKey][field] = e.target.value;
+            });
+        });
+
+        document.getElementById('inp-logo-file').addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                draftState.customLogo = reader.result;
+                updateModalLogoPreview();
+            };
+            reader.readAsDataURL(file);
+        });
+        document.getElementById('btn-reset-logo').addEventListener('click', () => {
+            draftState.customLogo = '';
+            updateModalLogoPreview();
+        });
+
+        document.querySelectorAll('.sim-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('inp-sim-enabled').checked = true;
+                document.getElementById('inp-sim-time').value = btn.dataset.preset;
+            });
+        });
+
+        document.getElementById('btn-export-json').addEventListener('click', () => {
+            const payload = {
+                app: 'cihangir-okul-panosu',
+                version: formatAppVersion(),
+                exportedAt: new Date().toISOString(),
+                settings: state
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            const d = new Date().toISOString().slice(0, 10);
+            a.href = URL.createObjectURL(blob);
+            a.download = `cihangir-pano-ayarlari-${d}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        });
+
+        document.getElementById('inp-import-json').addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const parsed = JSON.parse(reader.result);
+                    const incoming = parsed.settings ? parsed.settings : parsed;
+                    state = normalizeState(incoming);
+                    saveState();
+                    closeSettingsModal();
+                    renderHeaderStatic();
+                    renderTicker();
+                    renderNoticesList();
+                    tickBoard();
+                    if (state.weatherAuto) fetchKayseriWeather();
+                } catch (err) {
+                    alert('Geçersiz JSON dosyası!');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        document.getElementById('btn-reset-all').addEventListener('click', () => {
+            if (!confirm('Tüm ayarlar varsayılan değerlere sıfırlansın mı?')) return;
+            state = deepClone(DEFAULT_STATE);
+            saveState();
+            closeSettingsModal();
+            renderHeaderStatic();
+            renderTicker();
+            renderNoticesList();
+            tickBoard();
+            fetchKayseriWeather();
+        });
+
+        document.getElementById('btn-save-modal').addEventListener('click', () => {
+            draftState.schoolName = document.getElementById('inp-school-name').value.trim() || 'CİHANGİR OKULLARI';
+            draftState.schoolSubtitle = document.getElementById('inp-school-subtitle').value.trim() || 'Kayseri Merkez Kampüs';
+            draftState.weatherAuto = document.getElementById('inp-weather-auto').checked;
+            draftState.weatherIcon = document.getElementById('inp-weather-icon').value;
+            draftState.weatherText = document.getElementById('inp-weather-text').value.trim();
+            draftState.autoDark = {
+                enabled: document.getElementById('inp-autodark-enabled').checked,
+                byWeather: document.getElementById('inp-autodark-weather').checked,
+                byTime: document.getElementById('inp-autodark-time').checked,
+                startTime: document.getElementById('inp-autodark-start').value || '17:30',
+                endTime: document.getElementById('inp-autodark-end').value || '07:30'
+            };
+            draftState.qrProtection = document.getElementById('inp-qr-protection').checked;
+            const lines = document.getElementById('inp-ticker-lines').value.split('\n').map(s => s.trim()).filter(Boolean);
+            draftState.tickerLines = lines.length ? lines : deepClone(DEFAULT_STATE.tickerLines);
+            draftState.simulation = {
+                enabled: document.getElementById('inp-sim-enabled').checked,
+                dayIdx: Number(document.getElementById('inp-sim-day').value) || 3,
+                time: document.getElementById('inp-sim-time').value || '09:15'
+            };
+
+            state = normalizeState(draftState);
+            saveState();
+            closeSettingsModal();
+            renderHeaderStatic();
+            renderTicker();
+            renderNoticesList();
+            tickBoard();
+            if (state.weatherAuto) fetchKayseriWeather();
+        });
+
+        // Sağ alt sekme butonları ve nöbet sayfa geçişi
+        document.getElementById('btn-panel-notices').addEventListener('click', () => setRightPanel('notices'));
+        document.getElementById('btn-panel-news').addEventListener('click', () => setRightPanel('news'));
+        document.getElementById('btn-panel-menu').addEventListener('click', () => setRightPanel('menu'));
+        document.getElementById('btn-panel-world').addEventListener('click', () => setRightPanel('world'));
+        document.getElementById('duty-page-indicator').addEventListener('click', () => {
+            currentDutyPage++;
+            renderDutyCard(getEffectiveDate());
+        });
+
+        // ==================== BAŞLATMA & ZAMANLAYICILAR ====================
+        renderHeaderStatic();
+        renderTicker();
+        renderSlide();
+        renderNoticesList();
+        renderNewsList();
+        renderWorldCenters();
+        setRightPanel('notices');
+        tickBoard();
+
+        fetchKayseriWeather();
+        fetchWorldCentersWeather();
+        fetchDailyShowcaseAndNews();
+
+        setInterval(tickBoard, 1000);
+        setInterval(() => {
+            currentClassPage++;
+            tickBoard();
+        }, 7000);
+        setInterval(() => {
+            currentDutyPage++;
+            renderDutyCard(getEffectiveDate());
+        }, 6000);
+        setInterval(() => {
+            currentSlideIdx++;
+            renderSlide();
+        }, 8000);
+        setInterval(() => {
+            const order = ['notices', 'news', 'menu', 'world'];
+            const next = order[(order.indexOf(activeRightPanel) + 1) % order.length];
+            setRightPanel(next);
+        }, 10000);
+        setInterval(() => {
+            fetchKayseriWeather();
+            fetchWorldCentersWeather();
+        }, 15 * 60 * 1000);
+        setInterval(fetchDailyShowcaseAndNews, 30 * 60 * 1000);
+    </script>
+</body>
+</html>
