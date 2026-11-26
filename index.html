@@ -186,6 +186,9 @@
 </head>
 <body class="bg-[#F1F5F9] dark:bg-[#0D111D] text-slate-900 dark:text-white transition-colors duration-300">
 
+    <!-- Bildirim Toast Kutusu (alert/confirm yerine) -->
+    <div id="toast-box" class="fixed top-4 right-4 z-[70] hidden max-w-sm px-4 py-3 rounded-xl shadow-xl border text-xs font-bold transition-all"></div>
+
     <div class="board-shell">
         <!-- ==================== 1. ÜST BİLGİ ÇUBUĞU ==================== -->
         <header class="w-full bg-white dark:bg-[#141928] border-b border-slate-200 dark:border-slate-800 px-4 lg:px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 z-20">
@@ -319,7 +322,7 @@
                             Günlük Bilgi Vitrini Yükleniyor...
                         </h3>
                         <p id="slide-desc" class="text-xs sm:text-sm text-slate-200/95 truncate">
-                            Spor, doğa ve müzik dünyasından okula uygun her gün yenilenen içerikler.
+                            Spor, okul ve bilim dünyasından okula uygun güncel içerikler.
                         </p>
                     </div>
                 </div>
@@ -334,7 +337,7 @@
                                 1. Ders
                             </span>
                         </div>
-                        <span id="timetable-page-indicator" class="text-[11px] font-semibold text-slate-400 dark:text-slate-300 shrink-0 tabular-nums">
+                        <span id="timetable-page-indicator" class="text-[11px] font-semibold text-slate-400 dark:text-slate-300 shrink-0 tabular-nums cursor-pointer hover:text-brand-blue transition" title="Sonraki sayfa">
                             Sayfa 1/4
                         </span>
                     </div>
@@ -379,7 +382,12 @@
                                 Dünya
                             </button>
                         </div>
-                        <span id="notices-news-dot" class="w-2 h-2 rounded-full bg-brand-red shrink-0"></span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button id="btn-refresh-news" type="button" title="Haberleri ve Vitrini Manuel Güncelle" class="w-6 h-6 rounded-lg flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+                                <svg id="icon-refresh-news" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </button>
+                            <span id="notices-news-dot" class="w-2 h-2 rounded-full bg-brand-red shrink-0"></span>
+                        </div>
                     </div>
 
                     <div id="campus-notices-list" class="flex-1 min-h-0 flex flex-col justify-between gap-2 overflow-y-auto thin-scroll"></div>
@@ -409,7 +417,7 @@
 
             <div id="app-version-badge" title="Pano Sürümü" class="h-full px-3.5 bg-[#121726] border-l border-slate-700/80 text-[11px] font-mono font-bold text-slate-300 flex items-center gap-1.5 shrink-0 z-10 select-none">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
-                <span id="app-version-text">v1.802 stable</span>
+                <span id="app-version-text">v1.813 stable</span>
             </div>
         </footer>
     </div>
@@ -712,6 +720,38 @@
 
                 <!-- SEKME 4: DUYURULAR & SLAYTLAR -->
                 <div id="tab-content" class="tab-panel hidden space-y-5">
+                    <div class="p-4 rounded-2xl bg-brand-blue/5 dark:bg-brand-blue/10 border border-brand-blue/25 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="text-xs font-extrabold text-brand-navy dark:text-blue-300 uppercase tracking-wide">
+                                Haber &amp; Panel Değişme Sıklığı
+                            </div>
+                            <button id="btn-modal-refresh-news" type="button" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-blue hover:bg-blue-600 text-white text-[11px] font-bold shadow-sm transition">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Haberleri Şimdi Güncelle</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Vitrin Slayt / Haber (sn)</label>
+                                <input id="inp-interval-slide" type="number" min="3" max="120" value="12"
+                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Sağ Panel Geçişi (sn)</label>
+                                <input id="inp-interval-panel" type="number" min="3" max="120" value="12"
+                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1">Haber Yenileme (dk)</label>
+                                <input id="inp-interval-news" type="number" min="5" max="180" value="30"
+                                    class="w-full px-3 py-2 rounded-xl bg-white dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                            Slayt vitrinindeki haberlerin, sağ alttaki Duyuru/Haber/Menü/Dünya sekmelerinin dönüş süresini ve internetten haber yenileme aralığını (varsayılan 30 dk) belirleyin.
+                        </p>
+                    </div>
+
                     <div class="space-y-2.5">
                         <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Kampüs Duyuruları (3 Adet)</label>
                         <div id="modal-notices-editor" class="space-y-2.5"></div>
@@ -812,60 +852,243 @@
 
     <!-- ==================== 5. UYGULAMA BETİĞİ ==================== -->
     <script>
+        /* =========================================================
+           SÜRÜM & SABİTLER
+           ========================================================= */
         const APP_VERSION_MAJOR = 1;
-        const APP_VERSION_MINOR = 802;
-        const STORAGE_KEY = 'cihangir_kayseri_pano_v1802';
-        const ADMIN_MASTER_CODE = 'administratorlogin';
+        const APP_VERSION_MINOR = 813;
+        const STORAGE_KEY = 'cihangir_kayseri_pano_v1813';
+        const MASTER_ADMIN_CODE = 'administratorlogin';
 
         function formatAppVersion() {
-            const minorStr = String(APP_VERSION_MINOR).padStart(3, '0').replace(/0+$/, '');
-            return minorStr ? `v${APP_VERSION_MAJOR}.${minorStr} stable` : `v${APP_VERSION_MAJOR} stable`;
+            const padded = String(APP_VERSION_MINOR).padStart(3, '0').replace(/0+$/, '');
+            return padded ? `v${APP_VERSION_MAJOR}.${padded} stable` : `v${APP_VERSION_MAJOR} stable`;
         }
 
-        const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-        const MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+        const DAY_NAMES = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+        const MONTH_NAMES = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 
-        // Dünya Merkezleri (İstenen Sıra: 1. İstanbul, 2. Londra, 3. New York, 4. Tokyo, 5. Berlin)
-        const WORLD_CENTERS = [
-            { id: 'istanbul', name: 'İstanbul', flag: '🇹🇷', tz: 'Europe/Istanbul', lat: 41.0082, lon: 28.9784, icon: '🌤️', temp: '--', desc: 'Yükleniyor...' },
-            { id: 'london',   name: 'Londra',   flag: '🇬🇧', tz: 'Europe/London',   lat: 51.5074, lon: -0.1278, icon: '⛅', temp: '--', desc: 'Yükleniyor...' },
-            { id: 'newyork',  name: 'New York', flag: '🇺🇸', tz: 'America/New_York',lat: 40.7128, lon: -74.0060, icon: '☀️', temp: '--', desc: 'Yükleniyor...' },
-            { id: 'tokyo',    name: 'Tokyo',    flag: '🇯🇵', tz: 'Asia/Tokyo',      lat: 35.6762, lon: 139.6503, icon: '🌤️', temp: '--', desc: 'Yükleniyor...' },
-            { id: 'berlin',   name: 'Berlin',   flag: '🇩🇪', tz: 'Europe/Berlin',   lat: 52.5200, lon: 13.4050,  icon: '☁️', temp: '--', desc: 'Yükleniyor...' }
-        ];
+        /* =========================================================
+           OKULA UYGUN İÇERİK FİLTRESİ (SPOR & OKUL/EĞİTİM GÜNDEMİ - HARİÇ TUTULANLAR)
+           ========================================================= */
+        const BANNED_CONTENT_REGEX = /(yusuf\s*tekin|michael\s*jackson|jackson\s*5|manifest|crush|cinayet|katliam|terör|intihar|tecavüz|taciz|uyuşturucu|kumar|bahis|alkol|sigara|bıçak|silah|patlama|savaş|bomba|ölüm|ceset|gözaltı|tutuklan|mahkeme|siyaset|seçim|parti|meclis|magazin|skandal|kavga|şiddet|kanlı|ifşa|yasak aşk|boşanma|aldatma|fetö|pkk|mafya|çete)/i;
+        const PREFERRED_TOPIC_REGEX = /(futbol|voleybol|basketbol|tenis|yüzme|atletizm|jimnastik|okçuluk|güreş|hentbol|olimpiyat|şampiyon|turnuva|milli takım|stadyum|spor|okul|eğitim|öğrenci|öğretmen|meb|lgs|sınav|tübitak|teknofest|bilim|robotik|kodlama|yapay zeka|kütüphane|kitap|burs|yarışma|akademi|doğa|orman|uzay|astronomi)/i;
 
+        function isSafeSchoolText(text) {
+            if (!text) return true;
+            return !BANNED_CONTENT_REGEX.test(String(text));
+        }
+
+        function isPreferredTopic(text) {
+            if (!text) return false;
+            return PREFERRED_TOPIC_REGEX.test(String(text));
+        }
+
+        function isRecentNewsItem(pubDateStr, maxDays = 3) {
+            if (!pubDateStr) return false;
+            const parsed = new Date(pubDateStr.replace(' ', 'T'));
+            if (isNaN(parsed.getTime())) return false;
+            const diffMs = Date.now() - parsed.getTime();
+            return diffMs >= -86400000 && diffMs <= maxDays * 24 * 60 * 60 * 1000;
+        }
+
+        function escapeHtml(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        /* =========================================================
+           ORTAOKUL 16 ŞUBE (5-A – 8-D) DERS PROGRAMI (YENİ.pdf + NÖBET EŞLEŞTİRMELİ)
+           ========================================================= */
         function buildDefaultClassPrograms() {
-            const grades = ['5', '6', '7', '8'];
-            const sections = ['A', 'B', 'C', 'D'];
-            const classes = [];
-            grades.forEach(g => {
-                sections.forEach(s => classes.push(`${g}-${s}`));
-            });
+            const SUBJECT_NAMES = {
+                'MAT': 'Matematik',
+                'TUR': 'Türkçe',
+                'FB': 'Fen Bilimleri',
+                'SB': 'Sosyal Bilgiler',
+                'IT': 'İnkılap Tarihi',
+                'DK': 'Din Kültürü',
+                'BT': 'Bilişim Teknolojileri',
+                'BE': 'Beden Eğitimi',
+                'ALM': 'Almanca',
+                'RSM': 'Görsel Sanatlar',
+                'MZK': 'Müzik',
+                'REH': 'Rehberlik',
+                'CA': 'Canlı / Atölye',
+                'DS': 'Deneme / Etüt',
+                'KS': 'Kulüp / Sınav',
+                'ING (MC)': 'İngilizce (MC)',
+                'ING(SP)': 'İngilizce (SP)'
+            };
 
-            const subjects = [
-                { subject: 'Matematik', teacher: 'M. Mavuşgil' },
-                { subject: 'Türkçe', teacher: 'H. Yerer' },
-                { subject: 'Fen Bilimleri', teacher: 'Ö. F. Güngör' },
-                { subject: 'İngilizce', teacher: 'Z. B. Güven' },
-                { subject: 'Sosyal Bilgiler', teacher: 'K. Altınöz' },
-                { subject: 'Bilişim & Kodlama', teacher: 'B. E. Öztürk' },
-                { subject: 'Müzik', teacher: 'S. Yörenç' },
-                { subject: 'Beden Eğitimi', teacher: 'M. Çobanoğlu' }
-            ];
-            const map = {};
-            classes.forEach((cls, cIdx) => {
-                map[cls] = {};
-                for (let d = 1; d <= 5; d++) {
-                    map[cls][String(d)] = [];
-                    for (let p = 0; p < 8; p++) {
-                        const pick = subjects[(cIdx + d + p) % subjects.length];
-                        map[cls][String(d)].push({ subject: pick.subject, teacher: pick.teacher });
-                    }
+            const TEACHER_NAMES = {
+                'NÖ': 'Neslihan Öztürk',
+                'NO': 'Neslihan Öztürk',
+                'GG': 'Gürkan Göçen',
+                'TÖ': 'Tuhan Öksüz',
+                'MK': 'Mehmet Koç',
+                'HM': 'Hümeyra Mutlu',
+                'PY': 'Pembe Yürüm',
+                'SE': 'Selma Ersem',
+                'ZB': 'Zeynep Birsen Güven',
+                'MÇ': 'Murat Çobanoğlu',
+                'MC': 'Murat Çobanoğlu',
+                'BEÖ': 'Bulut Efe Öztürk',
+                'MM': 'Mustafa Mavuşgil',
+                'ÖFG': 'Ömer Faruk Güngör',
+                'KA': 'Kazım Altınöz',
+                'HY': 'Handan Yerer'
+            };
+
+            function resolveTeacher(code, subjCode) {
+                if (!code) return '';
+                const clean = String(code).trim();
+                if (clean.includes('/')) {
+                    return clean.split('/').map(part => {
+                        const p = part.trim();
+                        if (p === 'R' || p === 'B') return 'Rehberlik';
+                        return resolveTeacher(p, subjCode);
+                    }).join(' / ');
                 }
-            });
-            return map;
+                if (clean === 'BA') {
+                    return (subjCode && subjCode.startsWith('ING')) ? 'Büşra Alkan' : 'Bekir Altıntaş';
+                }
+                if (clean === 'SY') {
+                    return (subjCode === 'SB' || subjCode === 'CA') ? 'Sinem Yörenç' : 'Sevda Yıldırım';
+                }
+                return TEACHER_NAMES[clean] || clean;
+            }
+
+            function dayArr(pairs) {
+                return pairs.map(([s, t]) => ({
+                    subject: SUBJECT_NAMES[s] || s,
+                    teacher: resolveTeacher(t, s)
+                }));
+            }
+
+            return {
+                '5-A': {
+                    1: dayArr([['RSM','NÖ'],['ING (MC)','HB'],['ING (MC)','HB'],['SB','SY'],['SB','SY'],['MZK','GG'],['DK','MB'],['DK','MB']]),
+                    2: dayArr([['TUR','ÖT'],['TUR','ÖT'],['ING (MC)','HB'],['ING (MC)','HB'],['FB','TÖ'],['FB','TÖ'],['MAT','BA'],['MAT','BA']]),
+                    3: dayArr([['BT','MK'],['BT','MK'],['ING (MC)','HB'],['ING (MC)','HB'],['BE','HM'],['BE','HM'],['ALM','PY'],['ALM','PY']]),
+                    4: dayArr([['ING(SP)','SY'],['ING(SP)','SY'],['MAT','SE'],['MAT','SE'],['TUR','ÖT'],['TUR','ÖT'],['FB','TÖ'],['FB','TÖ']]),
+                    5: dayArr([['MAT','BA'],['MAT','BA'],['REH','R/ÖT'],['ING (MC)','HB'],['TUR','ÖT'],['TUR','ÖT'],['CA','SY/NÖ'],['SB','SY']])
+                },
+                '5-B': {
+                    1: dayArr([['ING (MC)','HB'],['ING (MC)','HB'],['BE','HM'],['MAT','BA'],['MAT','BA'],['REH','R/BA'],['FB','TÖ'],['FB','TÖ']]),
+                    2: dayArr([['ALM','PY'],['ALM','PY'],['DK','MB'],['DK','MB'],['BT','MK'],['BT','MK'],['ING (MC)','HB'],['ING (MC)','HB']]),
+                    3: dayArr([['SB','SY'],['SB','SY'],['MZK','GG'],['FB','TÖ'],['FB','TÖ'],['CA','SY/NÖ'],['TUR','ÖT'],['TUR','ÖT']]),
+                    4: dayArr([['ING (MC)','HB'],['ING (MC)','HB'],['ING(SP)','SY'],['ING(SP)','SY'],['MAT','SE'],['MAT','SE'],['TUR','ÖT'],['TUR','ÖT']]),
+                    5: dayArr([['ING (MC)','HB'],['ING (MC)','HB'],['MAT','BA'],['MAT','BA'],['SB','SY'],['RSM','NÖ'],['TUR','ÖT'],['TUR','ÖT']])
+                },
+                '5-C': {
+                    1: dayArr([['SB','SY'],['SB','SY'],['DK','MB'],['DK','MB'],['ING (MC)','HB'],['FB','TÖ'],['TUR','ÖT'],['TUR','ÖT']]),
+                    2: dayArr([['MAT','BA'],['MAT','BA'],['TUR','ÖT'],['TUR','ÖT'],['ING (MC)','HB'],['ING (MC)','HB'],['FB','TÖ'],['FB','TÖ']]),
+                    3: dayArr([['ING (MC)','HB'],['ING (MC)','HB'],['MAT','BA'],['MAT','BA'],['TUR','ÖT'],['TUR','ÖT'],['RSM','NÖ'],['MZK','GG']]),
+                    4: dayArr([['BE','HM'],['BE','HM'],['ALM','PY'],['ALM','PY'],['BT','MK'],['BT','MK'],['ING (MC)','HB'],['ING (MC)','HB']]),
+                    5: dayArr([['ING(SP)','SY'],['ING(SP)','SY'],['SB','SY'],['SB','SY'],['MAT','SE'],['MAT','SE'],['CA','SY/NÖ'],['REH','R/TÖ']])
+                },
+                '5-D': {
+                    1: dayArr([['FB','TÖ'],['FB','TÖ'],['TUR','ÖT'],['TUR','ÖT'],['DK','MB'],['DK','MB'],['MAT','BA'],['MAT','BA']]),
+                    2: dayArr([['MZK','GG'],['ING (MC)','HB'],['FB','TÖ'],['FB','TÖ'],['ALM','PY'],['ALM','PY'],['SB','SY'],['SB','SY']]),
+                    3: dayArr([['MAT','BA'],['MAT','BA'],['TUR','ÖT'],['TUR','ÖT'],['ING (MC)','HB'],['ING (MC)','HB'],['BT','MK'],['BT','MK']]),
+                    4: dayArr([['MAT','SE'],['MAT','SE'],['ING (MC)','HB'],['ING (MC)','HB'],['SB','SY'],['REH','R/HB'],['RSM','NÖ'],['CA','SY/NÖ']]),
+                    5: dayArr([['TUR','ÖT'],['TUR','ÖT'],['ING(SP)','SY'],['ING(SP)','SY'],['BE','HM'],['BE','HM'],['ING (MC)','HB'],['ING (MC)','HB']])
+                },
+                '6-A': {
+                    1: dayArr([['FB','HY'],['FB','HY'],['RSM','NÖ'],['MAT','ZB'],['MAT','ZB'],['SB','MÇ'],['SB','MÇ'],['MZK','GG']]),
+                    2: dayArr([['TUR','BEÖ'],['TUR','BEÖ'],['ALM','PY'],['ALM','PY'],['MAT','ZB'],['MAT','ZB'],['ING (MC)','MM'],['ING (MC)','MM']]),
+                    3: dayArr([['FB','HY'],['BE','HM'],['BE','HM'],['SB','MÇ'],['ING (MC)','MM'],['ING (MC)','MM'],['TUR','BEÖ'],['TUR','BEÖ']]),
+                    4: dayArr([['MAT','ZB'],['MAT','ZB'],['FB','HY'],['FB','HY'],['TUR','BEÖ'],['TUR','BEÖ'],['ING (MC)','MM'],['ING (MC)','MM']]),
+                    5: dayArr([['DK','ÖFG'],['DK','ÖFG'],['ING(SP)','SS'],['ING(SP)','SS'],['REH','R/ZB'],['ING (MC)','MM'],['BT','MK'],['BT','MK']])
+                },
+                '6-B': {
+                    1: dayArr([['BT','MK'],['BT','MK'],['FB','HY'],['FB','HY'],['TUR','BEÖ'],['TUR','BEÖ'],['MAT','ZB'],['MAT','ZB']]),
+                    2: dayArr([['MAT','ZB'],['MAT','ZB'],['ING(SP)','SS'],['ING(SP)','SS'],['ING (MC)','MM'],['ING (MC)','MM'],['MZK','GG'],['SB','MÇ']]),
+                    3: dayArr([['MAT','ZB'],['MAT','ZB'],['ING (MC)','MM'],['ING (MC)','MM'],['TUR','BEÖ'],['TUR','BEÖ'],['FB','HY'],['FB','HY']]),
+                    4: dayArr([['ALM','PY'],['ALM','PY'],['SB','MÇ'],['SB','MÇ'],['RSM','NÖ'],['ING (MC)','MM'],['DK','ÖFG'],['DK','ÖFG']]),
+                    5: dayArr([['FB','HY'],['BE','HM'],['BE','HM'],['TUR','BEÖ'],['TUR','BEÖ'],['REH','R/BEÖ'],['ING (MC)','MM'],['ING (MC)','MM']])
+                },
+                '6-C': {
+                    1: dayArr([['MAT','ZB'],['MAT','ZB'],['SB','MÇ'],['MZK','GG'],['RSM','NÖ'],['ING (MC)','MM'],['TUR','BEÖ'],['TUR','BEÖ']]),
+                    2: dayArr([['BT','MK'],['BT','MK'],['FB','HY'],['FB','HY'],['ING(SP)','SS'],['ING(SP)','SS'],['BE','HM'],['BE','HM']]),
+                    3: dayArr([['ING (MC)','MM'],['ING (MC)','MM'],['TUR','BEÖ'],['TUR','BEÖ'],['MAT','ZB'],['MAT','ZB'],['SB','MÇ'],['SB','MÇ']]),
+                    4: dayArr([['ING (MC)','MM'],['ING (MC)','MM'],['DK','ÖFG'],['DK','ÖFG'],['FB','HY'],['FB','HY'],['MAT','ZB'],['MAT','ZB']]),
+                    5: dayArr([['ING (MC)','MM'],['ING (MC)','MM'],['ALM','PY'],['ALM','PY'],['REH','B/HY'],['FB','HY'],['TUR','BEÖ'],['TUR','BEÖ']])
+                },
+                '6-D': {
+                    1: dayArr([['DK','ÖFG'],['DK','ÖFG'],['MZK','GG'],['ING (MC)','MM'],['ING (MC)','MM'],['RSM','NÖ'],['BT','MK'],['BT','MK']]),
+                    2: dayArr([['ING (MC)','MM'],['ING (MC)','MM'],['TUR','BEÖ'],['TUR','BEÖ'],['FB','HY'],['SB','MÇ'],['MAT','ZB'],['MAT','ZB']]),
+                    3: dayArr([['TUR','BEÖ'],['TUR','BEÖ'],['FB','HY'],['FB','HY'],['ALM','PY'],['ALM','PY'],['ING (MC)','MM'],['ING (MC)','MM']]),
+                    4: dayArr([['SB','MÇ'],['SB','MÇ'],['ING (MC)','MM'],['REH','B/MM'],['MAT','ZB'],['MAT','ZB'],['BE','HM'],['BE','HM']]),
+                    5: dayArr([['TUR','BEÖ'],['TUR','BEÖ'],['MAT','ZB'],['MAT','ZB'],['ING(SP)','SS'],['ING(SP)','SS'],['FB','HY'],['FB','HY']])
+                },
+                '7-A': {
+                    1: dayArr([['ING (MC)','BA'],['ING (MC)','BA'],['MAT','AYH'],['MAT','AYH'],['FB','HY'],['FB','HY'],['SB','SY'],['SB','SY']]),
+                    2: dayArr([['ING (MC)','BA'],['ING (MC)','BA'],['MAT','AYH'],['MAT','AYH'],['REH','B/KA'],['MZK','GG'],['TUR','KA'],['TUR','KA']]),
+                    3: dayArr([['TUR','ÖT'],['TUR','ÖT'],['ALM','PY'],['ALM','PY'],['ING (MC)','BA'],['ING (MC)','BA'],['BE','HM'],['BE','HM']]),
+                    4: dayArr([['TUR','KA'],['TUR','KA'],['FB','EH'],['FB','EH'],['MAT','BA'],['ING (MC)','BA'],['BT','MK'],['BT','MK']]),
+                    5: dayArr([['SB','SY'],['MAT','AYH'],['FB','EH'],['FB','EH'],['RSM','NÖ'],['TUR','KA'],['DK','ÖFG'],['DK','ÖFG']])
+                },
+                '7-B': {
+                    1: dayArr([['TUR','ÖT'],['TUR','ÖT'],['MAT','BA'],['ING (MC)','BA'],['ING (MC)','BA'],['DK','ÖFG'],['FB','EH'],['FB','EH']]),
+                    2: dayArr([['MAT','AYH'],['MAT','AYH'],['SB','SY'],['SB','SY'],['TUR','KA'],['TUR','KA'],['RSM','NÖ'],['MZK','GG']]),
+                    3: dayArr([['ING (MC)','BA'],['ING (MC)','BA'],['TUR','KA'],['TUR','KA'],['BT','MK'],['BT','MK'],['MAT','AYH'],['MAT','AYH']]),
+                    4: dayArr([['FB','HY'],['FB','HY'],['TUR','KA'],['TUR','KA'],['BE','HM'],['BE','HM'],['SB','SY'],['SB','SY']]),
+                    5: dayArr([['FB','EH'],['REH','B/BA'],['ING (MC)','BA'],['ING (MC)','BA'],['ALM','PY'],['ALM','PY'],['MAT','AYH'],['MAT','AYH']])
+                },
+                '7-C': {
+                    1: dayArr([['MAT','AYH'],['MAT','AYH'],['SB','SY'],['TUR','KA'],['BT','MK'],['BT','MK'],['ING (MC)','BA'],['ING (MC)','BA']]),
+                    2: dayArr([['FB','EH'],['FB','EH'],['MZK','GG'],['REH','B/SY'],['BE','HM'],['BE','HM'],['MAT','AYH'],['MAT','AYH']]),
+                    3: dayArr([['TUR','KA'],['TUR','KA'],['SB','SY'],['SB','SY'],['MAT','AYH'],['MAT','AYH'],['ING (MC)','BA'],['ING (MC)','BA']]),
+                    4: dayArr([['DK','ÖFG'],['DK','ÖFG'],['ING (MC)','BA'],['ING (MC)','BA'],['TUR','AH'],['TUR','AH'],['FB','HY'],['FB','HY']]),
+                    5: dayArr([['RSM','NÖ'],['FB','EH'],['TUR','KA'],['TUR','KA'],['ING (MC)','BA'],['MAT','BA'],['ALM','PY'],['ALM','PY']])
+                },
+                '7-D': {
+                    1: dayArr([['MZK','GG'],['SB','SY'],['FB','EH'],['FB','EH'],['ING (MC)','BA'],['REH','B/AYH'],['MAT','AYH'],['MAT','AYH']]),
+                    2: dayArr([['RSM','NÖ'],['BE','HM'],['BE','HM'],['TUR','KA'],['SB','SY'],['SB','SY'],['BT','MK'],['BT','MK']]),
+                    3: dayArr([['ALM','PY'],['ALM','PY'],['ING (MC)','BA'],['ING (MC)','BA'],['TUR','AH'],['TUR','AH'],['MAT','BA'],['FB','EH']]),
+                    4: dayArr([['ING (MC)','BA'],['ING (MC)','BA'],['MAT','AYH'],['MAT','AYH'],['DK','ÖFG'],['DK','ÖFG'],['TUR','KA'],['TUR','KA']]),
+                    5: dayArr([['TUR','KA'],['TUR','KA'],['FB','HY'],['FB','HY'],['MAT','AYH'],['MAT','AYH'],['ING (MC)','BA'],['ING (MC)','BA']])
+                },
+                '8-A': {
+                    1: dayArr([['IT','MÇ'],['IT','MÇ'],['TUR','AH'],['TUR','AH'],['FB','EH'],['FB','EH'],['MAT','SE'],['MAT','SE']]),
+                    2: dayArr([['TUR','KA'],['TUR','KA'],['DK','ÖFG'],['DK','ÖFG'],['BE','FÜ'],['BE','FÜ'],['MAT','SE'],['MAT','SE']]),
+                    3: dayArr([['KS','SE/AH/EH/MÇ/SY'],['KS','ÖFG'],['MAT','UM'],['MAT','UM'],['ING (MC)','SY'],['FB','TÖ'],['FB','TÖ'],['DK','ÖFG']]),
+                    4: dayArr([['DS','BA'],['DS','BA'],['DS','BA'],['DS','BA'],['ING (MC)','SY'],['ING (MC)','SY'],['TUR','AH'],['TUR','AH']]),
+                    5: dayArr([['TUR','AH'],['TUR','AH'],['MAT','SE'],['MAT','SE'],['FB','EH'],['FB','EH'],['IT','MÇ'],['IT','MÇ']])
+                },
+                '8-B': {
+                    1: dayArr([['MAT','SE'],['MAT','SE'],['BE','FÜ'],['BE','FÜ'],['ING (MC)','SY'],['ING (MC)','SY'],['TUR','AH'],['TUR','AH']]),
+                    2: dayArr([['DK','ÖFG'],['DK','ÖFG'],['MAT','SE'],['MAT','SE'],['FB','EH'],['FB','EH'],['ING (MC)','SY'],['ING (MC)','SY']]),
+                    3: dayArr([['KS','SE/AH/EH/MÇ/SY'],['FB','EH'],['MAT','SE'],['MAT','SE'],['DK','ÖFG'],['DK','ÖFG'],['TUR','AH'],['TUR','AH']]),
+                    4: dayArr([['DS','TÖ'],['DS','TÖ'],['DS','TÖ'],['DS','TÖ'],['TUR','KA'],['TUR','KA'],['MAT','UM'],['MAT','UM']]),
+                    5: dayArr([['IT','MÇ'],['IT','MÇ'],['FB','TÖ'],['FB','TÖ'],['IT','MÇ'],['IT','MÇ'],['TUR','AH'],['TUR','AH']])
+                },
+                '8-C': {
+                    1: dayArr([['FB','EH'],['FB','EH'],['DK','ÖFG'],['DK','ÖFG'],['TUR','KA'],['TUR','KA'],['ING (MC)','SY'],['ING (MC)','SY']]),
+                    2: dayArr([['BE','FÜ'],['BE','FÜ'],['FB','EH'],['FB','EH'],['MAT','SE'],['MAT','SE'],['TUR','AH'],['TUR','AH']]),
+                    3: dayArr([['KS','SE/AH/EH/MÇ/SY'],['DK','ÖFG'],['TUR','AH'],['TUR','AH'],['MAT','UM'],['MAT','UM'],['ING (MC)','SY'],['ING (MC)','SY']]),
+                    4: dayArr([['DS','BEÖ'],['DS','BEÖ'],['DS','BEÖ'],['DS','BEÖ'],['IT','MÇ'],['IT','MÇ'],['MAT','SE'],['MAT','SE']]),
+                    5: dayArr([['FB','TÖ'],['FB','TÖ'],['IT','MÇ'],['IT','MÇ'],['TUR','AH'],['TUR','AH'],['MAT','SE'],['MAT','SE']])
+                },
+                '8-D': {
+                    1: dayArr([['TUR','AH'],['TUR','AH'],['FB','TÖ'],['FB','TÖ'],['MAT','SE'],['MAT','SE'],['DK','ÖFG'],['DK','ÖFG']]),
+                    2: dayArr([['MAT','SE'],['MAT','SE'],['BE','FÜ'],['BE','FÜ'],['TUR','AH'],['TUR','AH'],['FB','EH'],['FB','EH']]),
+                    3: dayArr([['KS','SE/AH/EH/MÇ/SY'],['ING (MC)','SY'],['ING (MC)','SY'],['DK','ÖFG'],['IT','MÇ'],['IT','MÇ'],['TUR','KA'],['TUR','KA']]),
+                    4: dayArr([['DS','SY'],['DS','SY'],['DS','SY'],['DS','SY'],['MAT','UM'],['MAT','UM'],['IT','MÇ'],['IT','MÇ']]),
+                    5: dayArr([['MAT','SE'],['MAT','SE'],['TUR','AH'],['TUR','AH'],['ING (MC)','SY'],['ING (MC)','SY'],['FB','EH'],['FB','EH']])
+                }
+            };
         }
 
+        /* =========================================================
+           VARSAYILAN PANO DURUMU (deneme.json + YENİ.pdf)
+           ========================================================= */
         const DEFAULT_STATE = {
             theme: 'light',
             qrProtection: true,
@@ -887,6 +1110,11 @@
                 dayIdx: 3,
                 time: '09:15'
             },
+            intervals: {
+                slideSec: 12,
+                panelSec: 12,
+                newsMin: 30
+            },
             schedule: [
                 { id: 1, name: '1. Ders', start: '09:00', end: '09:40' },
                 { id: 2, name: '2. Ders', start: '09:50', end: '10:30' },
@@ -898,7 +1126,7 @@
                 { id: 8, name: '8. Ders', start: '15:30', end: '16:10' }
             ],
             dutyByDay: {
-                '1': [
+                1: [
                     { area: '1. Kat Kuzey', teacher: 'Zeynep Birsen Güven' },
                     { area: '1. Kat Güney', teacher: 'Selma Ersem' },
                     { area: '2. Kat Kuzey', teacher: 'Büşra Alkan' },
@@ -911,7 +1139,7 @@
                     { area: 'Bahçe Arka-Yan', teacher: 'Emine Karpuzcu Sazak' },
                     { area: '-1. Kat', teacher: 'Hümeyra Mutlu' }
                 ],
-                '2': [
+                2: [
                     { area: '1. Kat Kuzey', teacher: 'Mustafa Mavuşgil' },
                     { area: '1. Kat Güney', teacher: 'Gülay Yüksel' },
                     { area: '2. Kat Kuzey', teacher: 'Ömer Faruk Güngör' },
@@ -924,7 +1152,7 @@
                     { area: 'Bahçe Arka-Yan', teacher: 'Yaşar Barık' },
                     { area: '-1. Kat', teacher: 'Mehmet Koç' }
                 ],
-                '3': [
+                3: [
                     { area: '1. Kat Kuzey', teacher: 'Handan Yerer' },
                     { area: '1. Kat Güney', teacher: 'Bulut Efe Öztürk' },
                     { area: '2. Kat Kuzey', teacher: 'Tuhan Öksüz' },
@@ -937,7 +1165,7 @@
                     { area: 'Bahçe Arka-Yan', teacher: 'Murat Çobanoğlu' },
                     { area: '-1. Kat', teacher: 'Hakan Yılmaz' }
                 ],
-                '4': [
+                4: [
                     { area: '1. Kat Kuzey', teacher: 'Büşra Alkan' },
                     { area: '1. Kat Güney', teacher: 'Emine Karpuzcu Sazak' },
                     { area: '2. Kat Kuzey', teacher: 'Selma Ersem' },
@@ -950,7 +1178,7 @@
                     { area: 'Bahçe Arka-Yan', teacher: 'Hümeyra Mutlu' },
                     { area: '-1. Kat', teacher: 'Pembe Yürüm' }
                 ],
-                '5': [
+                5: [
                     { area: '1. Kat Kuzey', teacher: 'Bekir Altıntaş' },
                     { area: '1. Kat Güney', teacher: 'Mustafa Mavuşgil' },
                     { area: '2. Kat Kuzey', teacher: 'Sinem Yörenç' },
@@ -964,628 +1192,700 @@
                     { area: '-1. Kat', teacher: 'Mehmet Koç' }
                 ]
             },
-            classPrograms: buildDefaultClassPrograms(),
             notices: [
-                { tag: 'ÖNEMLİ', color: 'red', title: 'LGS Deneme Sınavı', desc: 'Cuma günü 09:00’da tüm 8. sınıflar için genel deneme yapılacaktır.' },
-                { tag: 'ETKİNLİK', color: 'blue', title: 'STEM & Robotik Atölyesi', desc: 'Kodlama kulübü çalışmaları her Salı ve Perşembe 16:00’da laboratuvarda.' },
-                { tag: 'SPOR', color: 'teal', title: 'Okullar Arası Voleybol Turnuvası', desc: 'Okul takımımıza yarı final müsabakasında başarılar dileriz!' }
+                {
+                    tag: 'ÖNEMLİ',
+                    color: 'red',
+                    title: 'LGS Deneme Sınavı',
+                    desc: 'Cuma günü 09:00’da tüm 8. sınıflar için genel deneme yapılacaktır.'
+                },
+                {
+                    tag: 'ETKİNLİK',
+                    color: 'blue',
+                    title: 'STEM & Robotik Atölyesi',
+                    desc: 'Kodlama kulübü çalışmaları her Salı ve Perşembe 16:00’da laboratuvarda.'
+                },
+                {
+                    tag: 'SPOR',
+                    color: 'teal',
+                    title: 'Okullar Arası Voleybol Turnuvası',
+                    desc: 'Ortaokul takımımıza yarı final müsabakasında başarılar dileriz!'
+                }
             ],
             tickerLines: [
                 'Cihangir Okulları Kayseri Merkez Kampüs’e hoş geldiniz! Verimli ve başarılı bir gün dileriz.',
-                'Kütüphanemiz hafta içi her gün 08:15 – 17:00 saatleri arasında tüm öğrencilerimize açıktır.',
+                'Kütüphanemiz hafta içi her gün 08:30 – 17:00 saatleri arasında tüm öğrencilerimize açıktır.',
                 'LGS etüt programları için sınıf rehber öğretmeninizle görüşebilirsiniz.',
                 'Okul içi düzen ve çevre temizliği hepimizin ortak sorumluluğudur.'
             ],
             menuByDay: {
-                '1': { soup: 'Mercimek Çorbası', main: 'Fırın Tavuk & Patates', side: 'Pirinç Pilavı', extra: 'Ayran & Elma' },
-                '2': { soup: 'Ezogelin Çorbası', main: 'Izgara Köfte', side: 'Tereyağlı Makarna', extra: 'Mevsim Salata & Sütlaç' },
-                '3': { soup: 'Yayla Çorbası', main: 'Etli Kuru Fasulye', side: 'Şehriyeli Pilav', extra: 'Cacık & Mandalina' },
-                '4': { soup: 'Domates Çorbası', main: 'Sebzeli Tavuk Sote', side: 'Bulgur Pilavı', extra: 'Yoğurt & Muz' },
-                '5': { soup: 'Tarhana Çorbası', main: 'Kayseri Mantısı', side: 'Zeytinyağlı Fasulye', extra: 'Komposto & Kurabiye' }
-            }
+                1: { soup: 'Mercimek Çorbası', main: 'Fırın Tavuk & Patates', side: 'Pirinç Pilavı', extra: 'Ayran & Elma' },
+                2: { soup: 'Ezogelin Çorbası', main: 'Izgara Köfte', side: 'Tereyağlı Makarna', extra: 'Mevsim Salata & Sütlaç' },
+                3: { soup: 'Yayla Çorbası', main: 'Etli Kuru Fasulye', side: 'Şehriyeli Pilav', extra: 'Cacık & Mandalina' },
+                4: { soup: 'Domates Çorbası', main: 'Sebzeli Tavuk Sote', side: 'Bulgur Pilavı', extra: 'Yoğurt & Muz' },
+                5: { soup: 'Tarhana Çorbası', main: 'Kayseri Mantısı', side: 'Zeytinyağlı Fasulye', extra: 'Komposto & Kurabiye' }
+            },
+            classPrograms: buildDefaultClassPrograms()
         };
 
-        // ==================== YARDIMCI FONKSİYONLAR ====================
+        /* =========================================================
+           YEDEK VİTRİN SLAYTLARI & YEDEK HABERLER (SPOR & OKUL/BİLİM)
+           ========================================================= */
+        const FALLBACK_SLIDES = [
+            {
+                category: 'OKUL & BİLİM',
+                title: 'TÜBİTAK 4006 Bilim Fuarı Hazırlıkları',
+                desc: 'Öğrencilerimiz fen, matematik ve robotik alanlarında özgün projeler geliştiriyor.',
+                image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'SPOR GÜNDEMİ',
+                title: 'Okul Sporlarında Fair-Play ve Takım Ruhu',
+                desc: 'Basketbol, voleybol ve atletizm branşlarında düzenli antrenmanlar devam ediyor.',
+                image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'EĞİTİM & TEKNOLOJİ',
+                title: 'Robotik Kodlama ve Yapay Zeka Atölyesi',
+                desc: 'Algoritmik düşünme ve takım çalışması becerileri uygulamalı derslerle güçleniyor.',
+                image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80'
+            },
+            {
+                category: 'KİTAP & KÜLTÜR',
+                title: 'Her Gün 20 Dakika Kitap Okuma Alışkanlığı',
+                desc: 'Düzenli okuma, paragraf yorumlama ve odaklanma becerisini belirgin biçimde artırır.',
+                image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80'
+            }
+        ];
+
+        const FALLBACK_NEWS = [
+            {
+                category: 'SPOR',
+                color: 'teal',
+                title: 'Okul Sporları İl Birinciliği Müsabakaları Heyecanla Sürüyor',
+                source: 'Spor Gündemi',
+                time: 'Bugün'
+            },
+            {
+                category: 'OKUL & BİLİM',
+                color: 'blue',
+                title: 'TEKNOFEST ve TÜBİTAK Ortaokul Proje Başvurularında Yeni Dönem',
+                source: 'Eğitim & Bilim',
+                time: 'Bugün'
+            },
+            {
+                category: 'EĞİTİM',
+                color: 'amber',
+                title: 'LGS Hazırlıkta Düzenli Tekrar ve Paragraf Çözümünün Önemi',
+                source: 'Okul Gündemi',
+                time: 'Bugün'
+            }
+        ];
+
+        /* =========================================================
+           5 DÜNYA MERKEZİ (1. İSTANBUL, 2. LONDRA, 3. NEW YORK, 4. TOKYO, 5. BERLİN)
+           ========================================================= */
+        const WORLD_CENTERS = [
+            { id: 'istanbul', name: 'İstanbul', flag: '🇹🇷', tz: 'Europe/Istanbul', lat: 41.0082, lon: 28.9784, icon: '🌤️', temp: null, desc: 'Yükleniyor...' },
+            { id: 'london',   name: 'Londra',   flag: '🇬🇧', tz: 'Europe/London',   lat: 51.5074, lon: -0.1278, icon: '⛅', temp: null, desc: 'Yükleniyor...' },
+            { id: 'newyork',  name: 'New York', flag: '🇺🇸', tz: 'America/New_York',lat: 40.7128, lon: -74.0060, icon: '🌤️', temp: null, desc: 'Yükleniyor...' },
+            { id: 'tokyo',    name: 'Tokyo',    flag: '🇯🇵', tz: 'Asia/Tokyo',      lat: 35.6762, lon: 139.6503, icon: '☀️', temp: null, desc: 'Yükleniyor...' },
+            { id: 'berlin',   name: 'Berlin',   flag: '🇩🇪', tz: 'Europe/Berlin',   lat: 52.5200, lon: 13.4050, icon: '☁️', temp: null, desc: 'Yükleniyor...' }
+        ];
+
+        /* =========================================================
+           UYGULAMA DURUMU & ZAMANLAYICILAR
+           ========================================================= */
+        let state = loadState();
+        let slides = [...FALLBACK_SLIDES];
+        let liveNews = [...FALLBACK_NEWS];
+        let currentSlideIdx = 0;
+        let currentClassPage = 0;
+        let currentDutyPage = 0;
+        let activeRightPanel = 'notices'; // 'notices' | 'news' | 'menu' | 'world'
+        const RIGHT_PANELS = ['notices', 'news', 'menu', 'world'];
+
+        let currentWeatherCode = 2; // Open-Meteo WMO kodu
+        let manualThemeOverride = null; // Kullanıcı üst butona basarsa geçici override
+        let toastTimer = null;
+        let resetConfirmPending = false;
+
+        let slideTimerId = null;
+        let panelTimerId = null;
+        let newsTimerId = null;
+
+        // QR Kilidi değişkenleri
+        let currentQrPin = '';
+        let qrExpireSeconds = 120;
+        let qrCountdownId = null;
+
+        // Modal geçici düzenleme kopyaları
+        let modalDutyDraft = null;
+        let modalClassesDraft = null;
+        let modalMenuDraft = null;
+        let modalLogoDraft = '';
+
+        /* =========================================================
+           DURUM YÜKLEME / KAYDETME (GÜVENLİ)
+           ========================================================= */
         function deepClone(obj) {
             return JSON.parse(JSON.stringify(obj));
         }
 
-        function escapeHtml(str) {
-            return String(str || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function timeToMinutes(hhmm) {
-            const parts = String(hhmm || '00:00').split(':').map(Number);
-            return (parts[0] || 0) * 60 + (parts[1] || 0);
-        }
-
-        function formatCountdown(totalSec) {
-            const s = Math.max(0, Math.floor(totalSec));
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = s % 60;
-            if (h > 0) {
-                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-            }
-            return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-        }
-
-        function normalizeState(raw) {
-            const base = deepClone(DEFAULT_STATE);
-            if (!raw || typeof raw !== 'object') return base;
-            const merged = Object.assign(base, raw);
-            merged.autoDark = Object.assign(deepClone(DEFAULT_STATE.autoDark), raw.autoDark || {});
-            merged.simulation = Object.assign(deepClone(DEFAULT_STATE.simulation), raw.simulation || {});
-            if (!Array.isArray(merged.schedule) || merged.schedule.length === 0) merged.schedule = deepClone(DEFAULT_STATE.schedule);
-            if (!merged.dutyByDay || typeof merged.dutyByDay !== 'object') merged.dutyByDay = deepClone(DEFAULT_STATE.dutyByDay);
-            if (!merged.classPrograms || typeof merged.classPrograms !== 'object' || Object.keys(merged.classPrograms).length === 0) {
-                merged.classPrograms = deepClone(DEFAULT_STATE.classPrograms);
-            }
-            if (!Array.isArray(merged.notices) || merged.notices.length === 0) merged.notices = deepClone(DEFAULT_STATE.notices);
-            if (!Array.isArray(merged.tickerLines) || merged.tickerLines.length === 0) merged.tickerLines = deepClone(DEFAULT_STATE.tickerLines);
-            if (!merged.menuByDay || typeof merged.menuByDay !== 'object') merged.menuByDay = deepClone(DEFAULT_STATE.menuByDay);
-            return merged;
+        function mergeWithDefaults(raw) {
+            const def = deepClone(DEFAULT_STATE);
+            if (!raw || typeof raw !== 'object') return def;
+            return {
+                ...def,
+                ...raw,
+                autoDark: { ...def.autoDark, ...(raw.autoDark || {}) },
+                simulation: { ...def.simulation, ...(raw.simulation || {}) },
+                intervals: { ...def.intervals, ...(raw.intervals || {}) },
+                schedule: Array.isArray(raw.schedule) && raw.schedule.length ? raw.schedule : def.schedule,
+                dutyByDay: raw.dutyByDay && typeof raw.dutyByDay === 'object' ? { ...def.dutyByDay, ...raw.dutyByDay } : def.dutyByDay,
+                notices: Array.isArray(raw.notices) && raw.notices.length ? raw.notices : def.notices,
+                tickerLines: Array.isArray(raw.tickerLines) && raw.tickerLines.length ? raw.tickerLines : def.tickerLines,
+                menuByDay: raw.menuByDay && typeof raw.menuByDay === 'object' ? { ...def.menuByDay, ...raw.menuByDay } : def.menuByDay,
+                classPrograms: raw.classPrograms && typeof raw.classPrograms === 'object' && Object.keys(raw.classPrograms).length
+                    ? raw.classPrograms
+                    : def.classPrograms
+            };
         }
 
         function loadState() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) return normalizeState(JSON.parse(saved));
-            } catch (e) {}
+                if (saved) {
+                    return mergeWithDefaults(JSON.parse(saved));
+                }
+            } catch (err) {
+                console.warn('Ayarlar okunamadı, varsayılan kullanılıyor:', err);
+            }
             return deepClone(DEFAULT_STATE);
         }
-
-        let state = loadState();
-        let draftState = null;
-        let currentLiveWeatherCode = null;
-        let currentClassPage = 0;
-        let currentDutyPage = 0;
-        let currentSlideIdx = 0;
-        let activeRightPanel = 'notices'; // notices | news | menu | world
-        let lastFetchedDateKey = '';
 
         function saveState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            } catch (e) {}
-        }
-
-        // ==================== OKULA UYGUNLUK FİLTRESİ ====================
-        const BANNED_KEYWORDS = [
-            'manifest', 'crush', 'cinayet', 'katliam', 'terör', 'savaş', 'bomba', 'silah',
-            'saldırı', 'intihar', 'uyuşturucu', 'alkol', 'kumar', 'bahis', 'cinsel', 'taciz',
-            'şiddet', 'kanlı', 'ölüm', 'öldürüldü', 'tutuklandı', 'gözaltı', 'skandal', 'magazin',
-            'boşandı', 'aşk', 'sevgili', 'siyaset', 'parti', 'seçim', 'meclis', 'hükümet', 'darbe'
-        ];
-        const PREFERRED_KEYWORDS = [
-            'futbol', 'voleybol', 'basketbol', 'tenis', 'yüzme', 'atletizm', 'olimpiyat', 'şampiyon',
-            'millî takım', 'milli takım', 'turnuva', 'spor', 'stadyum', 'gol', 'madalya', 'rekor',
-            'doğa', 'orman', 'dağ', 'erciyes', 'okyanus', 'göl', 'nehir', 'ekosistem', 'millî park',
-            'milli park', 'yaban', 'gezegen', 'uzay', 'yıldız', 'güneş', 'iklim', 'bitki', 'kuş',
-            'müzik', 'senfoni', 'orkestra', 'piyano', 'keman', 'gitar', 'besteci', 'konser', 'türkü',
-            'enstrüman', 'koro', 'nota', 'sanat'
-        ];
-
-        function isSchoolSafe(text) {
-            const lower = String(text || '').toLocaleLowerCase('tr-TR');
-            return !BANNED_KEYWORDS.some(w => lower.includes(w));
-        }
-
-        function isPreferredTopic(text) {
-            const lower = String(text || '').toLocaleLowerCase('tr-TR');
-            return PREFERRED_KEYWORDS.some(w => lower.includes(w));
-        }
-
-        // ==================== YEDEK GÜNLÜK VİTRİN & HABER HAVUZU ====================
-        const FALLBACK_SLIDES = [
-            {
-                category: 'SPOR • TARİHTE BUGÜN',
-                title: 'Filenin Sultanları ve Türk Voleybolunun Yükselişi',
-                desc: 'Disiplin, takım ruhu ve azimle Avrupa ve Dünya sahnesinde kazanılan tarihi başarılar.',
-                image: 'https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=1200&q=80'
-            },
-            {
-                category: 'DOĞA • KAYSERİ',
-                title: 'Erciyes Dağı ve İç Anadolu Ekosistemi',
-                desc: '3.917 metre yüksekliğiyle Erciyes, benzersiz florası ve doğal güzellikleriyle şehrimizin simgesidir.',
-                image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80'
-            },
-            {
-                category: 'MÜZİK & SANAT',
-                title: 'Müziğin Zihin ve Öğrenme Üzerindeki Gücü',
-                desc: 'Bir enstrüman çalmak veya klasik müzik dinlemek odaklanmayı, hafızayı ve yaratıcılığı güçlendirir.',
-                image: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=1200&q=80'
-            },
-            {
-                category: 'SPOR DÜNYASI',
-                title: 'Fair-Play ve Takım Sporlarının Önemi',
-                desc: 'Futbol ve basketbol gibi takım sporları iş birliği, strateji ve saygı kültürünü geliştirir.',
-                image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=80'
-            },
-            {
-                category: 'DOĞA & BİLİM',
-                title: 'Ormanlar: Gezegenimizin Yeşil Akciğerleri',
-                desc: 'Her yeni fidan, gelecek nesiller için daha temiz bir hava ve daha yaşanabilir bir dünya demektir.',
-                image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80'
+            } catch (err) {
+                console.warn('Ayarlar tarayıcıya kaydedilemedi:', err);
             }
-        ];
+        }
 
-        const FALLBACK_NEWS = [
-            { tag: 'SPOR', color: 'teal', title: 'Okul Sporları Sezonu Heyecanla Devam Ediyor', desc: 'Genç sporcular voleybol, basketbol ve atletizm branşlarında fair-play ruhuyla yarışıyor.' },
-            { tag: 'DOĞA', color: 'blue', title: 'Sonbahar ve Kış Göçmen Kuşları Sulak Alanlarda', desc: 'Sultan Sazlığı ve Anadolu sulak alanları yüzlerce kuş türüne ev sahipliği yapmaya devam ediyor.' },
-            { tag: 'MÜZİK', color: 'navy', title: 'Gençlik Senfoni ve Okul Koroları Buluşması', desc: 'Klasik ve geleneksel müzik eserleri genç müzisyenlerin performanslarıyla sahneye taşınıyor.' }
-        ];
+        /* =========================================================
+           TOAST BİLDİRİMİ (alert/confirm YERİNE)
+           ========================================================= */
+        function showToast(message, type = 'info') {
+            const box = document.getElementById('toast-box');
+            if (!box) return;
+            const styles = {
+                success: 'bg-emerald-600 text-white border-emerald-500',
+                error:   'bg-brand-red text-white border-red-500',
+                info:    'bg-brand-navy text-white border-slate-700'
+            };
+            box.className = `fixed top-4 right-4 z-[70] max-w-sm px-4 py-3 rounded-xl shadow-xl border text-xs font-bold transition-all ${styles[type] || styles.info}`;
+            box.textContent = message;
+            box.classList.remove('hidden');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => box.classList.add('hidden'), 3200);
+        }
 
-        let showcaseSlides = deepClone(FALLBACK_SLIDES);
-        let currentNewsItems = deepClone(FALLBACK_NEWS);
+        /* =========================================================
+           ZAMAN & SİMÜLASYON YARDIMCILARI
+           ========================================================= */
+        function getEffectiveNow() {
+            const realNow = new Date();
+            if (!state.simulation?.enabled) {
+                return realNow;
+            }
+            const [hh, mm] = (state.simulation.time || '09:15').split(':').map(n => parseInt(n, 10) || 0);
+            const simDate = new Date(realNow);
+            const targetDay = parseInt(state.simulation.dayIdx, 10) || 3;
+            const diff = targetDay - simDate.getDay();
+            simDate.setDate(simDate.getDate() + diff);
+            simDate.setHours(hh, mm, realNow.getSeconds(), 0);
+            return simDate;
+        }
 
-        // ==================== CANLI HAVA DURUMU (KAYSERİ KOCASİNAN + 5 DÜNYA MERKEZİ) ====================
-        function decodeWmoWeather(code, isDay) {
-            if (code === 0) return { icon: isDay ? '☀️' : '🌙', text: isDay ? 'Açık' : 'Açık (Gece)', darkTrigger: false };
-            if (code === 1) return { icon: isDay ? '🌤️' : '🌙', text: 'Az Bulutlu', darkTrigger: false };
-            if (code === 2) return { icon: '⛅', text: 'Parçalı Bulutlu', darkTrigger: false };
-            if (code === 3) return { icon: '☁️', text: 'Bulutlu', darkTrigger: true };
-            if (code === 45 || code === 48) return { icon: '🌫️', text: 'Sisli', darkTrigger: true };
-            if ((code >= 51 && code <= 67) || (code >= 80 && code <= 82)) return { icon: '🌧️', text: 'Yağmurlu', darkTrigger: true };
-            if ((code >= 71 && code <= 77) || code === 85 || code === 86) return { icon: '❄️', text: 'Karlı', darkTrigger: true };
-            if (code >= 95 && code <= 99) return { icon: '⛈️', text: 'Gök Gürültülü Sağanak', darkTrigger: true };
-            return { icon: '🌤️', text: 'Parçalı Bulutlu', darkTrigger: false };
+        function parseHHMMToSec(hhmm) {
+            const [h, m] = String(hhmm || '00:00').split(':').map(n => parseInt(n, 10) || 0);
+            return h * 3600 + m * 60;
+        }
+
+        function formatMMSS(totalSec) {
+            const safe = Math.max(0, Math.floor(totalSec));
+            const h = Math.floor(safe / 3600);
+            const m = Math.floor((safe % 3600) / 60);
+            const s = safe % 60;
+            if (h > 0) {
+                return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        /* =========================================================
+           TEMA & OTOMATİK KARANLIK MOD
+           ========================================================= */
+        function isDarkWeatherCode(code) {
+            // 3: Kapalı, 45/48: Sis, 51-99: Yağmur/Kar/Fırtına
+            return code === 3 || code >= 45;
+        }
+
+        function isWithinTimeRange(nowSec, startStr, endStr) {
+            const start = parseHHMMToSec(startStr || '17:30');
+            const end = parseHHMMToSec(endStr || '07:30');
+            if (start <= end) {
+                return nowSec >= start && nowSec < end;
+            }
+            return nowSec >= start || nowSec < end;
+        }
+
+        function applyTheme(nowDate) {
+            let shouldBeDark = state.theme === 'dark';
+
+            if (manualThemeOverride !== null) {
+                shouldBeDark = manualThemeOverride === 'dark';
+            } else if (state.autoDark?.enabled) {
+                const now = nowDate || getEffectiveNow();
+                const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                const byTime = state.autoDark.byTime && isWithinTimeRange(nowSec, state.autoDark.startTime, state.autoDark.endTime);
+                const byWeather = state.autoDark.byWeather && isDarkWeatherCode(currentWeatherCode);
+                shouldBeDark = Boolean(byTime || byWeather);
+            }
+
+            document.documentElement.classList.toggle('dark', shouldBeDark);
+        }
+
+        /* =========================================================
+           HAVA DURUMU (KAYSERİ KOCASİNAN + 5 DÜNYA MERKEZİ)
+           ========================================================= */
+        function decodeWmoCode(code) {
+            if (code === 0) return { icon: '☀️', label: 'Açık' };
+            if (code === 1 || code === 2) return { icon: '🌤️', label: 'Az Bulutlu' };
+            if (code === 3) return { icon: '☁️', label: 'Kapalı' };
+            if (code === 45 || code === 48) return { icon: '🌫️', label: 'Sisli' };
+            if (code >= 51 && code <= 67) return { icon: '🌧️', label: 'Yağmurlu' };
+            if (code >= 71 && code <= 77) return { icon: '❄️', label: 'Karlı' };
+            if (code >= 80 && code <= 82) return { icon: '🌦️', label: 'Sağanak' };
+            if (code >= 95) return { icon: '⛈️', label: 'Fırtınalı' };
+            return { icon: '⛅', label: 'Parçalı Bulutlu' };
         }
 
         async function fetchKayseriWeather() {
-            if (!state.weatherAuto) return;
+            const iconEl = document.getElementById('header-weather-icon');
+            const textEl = document.getElementById('header-weather-text');
+
+            if (!state.weatherAuto) {
+                iconEl.textContent = state.weatherIcon || '🌤️';
+                textEl.textContent = state.weatherText || 'Kayseri Kocasinan';
+                return;
+            }
+
             try {
-                const url = 'https://api.open-meteo.com/v1/forecast?latitude=38.758&longitude=35.483&current=temperature_2m,weather_code,is_day&timezone=Europe%2FIstanbul';
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=38.7312&longitude=35.4787&current=temperature_2m,weather_code&timezone=Europe%2FIstanbul';
                 const res = await fetch(url);
-                if (!res.ok) return;
+                if (!res.ok) throw new Error('Weather API error');
                 const data = await res.json();
-                if (!data || !data.current) return;
-                const temp = Math.round(data.current.temperature_2m);
-                const code = data.current.weather_code;
-                const isDay = data.current.is_day === 1;
-                currentLiveWeatherCode = code;
-                const info = decodeWmoWeather(code, isDay);
-                state.weatherIcon = info.icon;
-                state.weatherText = `Kayseri Kocasinan • ${temp}°C • ${info.text}`;
-                renderHeaderStatic();
-                evaluateAutoTheme();
-            } catch (e) {}
+                const temp = Math.round(data.current?.temperature_2m ?? 0);
+                const code = data.current?.weather_code ?? 2;
+                currentWeatherCode = code;
+                const info = decodeWmoCode(code);
+                iconEl.textContent = info.icon;
+                textEl.textContent = `Kayseri Kocasinan • ${temp}°C • ${info.label}`;
+                applyTheme();
+            } catch (err) {
+                iconEl.textContent = state.weatherIcon || '🌤️';
+                textEl.textContent = state.weatherText || 'Kayseri Kocasinan • 4°C • Az Bulutlu';
+            }
         }
 
         async function fetchWorldCentersWeather() {
             try {
                 const lats = WORLD_CENTERS.map(c => c.lat).join(',');
                 const lons = WORLD_CENTERS.map(c => c.lon).join(',');
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code,is_day`;
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,weather_code`;
                 const res = await fetch(url);
-                if (!res.ok) return;
+                if (!res.ok) throw new Error('World weather API error');
                 const data = await res.json();
                 const list = Array.isArray(data) ? data : [data];
                 list.forEach((entry, idx) => {
-                    if (!WORLD_CENTERS[idx] || !entry || !entry.current) return;
-                    const info = decodeWmoWeather(entry.current.weather_code, entry.current.is_day === 1);
+                    if (!WORLD_CENTERS[idx] || !entry?.current) return;
+                    const info = decodeWmoCode(entry.current.weather_code ?? 2);
                     WORLD_CENTERS[idx].icon = info.icon;
-                    WORLD_CENTERS[idx].temp = `${Math.round(entry.current.temperature_2m)}°C`;
-                    WORLD_CENTERS[idx].desc = info.text;
+                    WORLD_CENTERS[idx].temp = Math.round(entry.current.temperature_2m ?? 0);
+                    WORLD_CENTERS[idx].desc = info.label;
                 });
                 renderWorldCenters();
-            } catch (e) {}
+            } catch (err) {
+                WORLD_CENTERS.forEach(c => {
+                    if (c.temp === null) {
+                        c.desc = 'Çevrimdışı';
+                    }
+                });
+                renderWorldCenters();
+            }
         }
 
-        // ==================== GÜNLÜK WIKIPEDIA + HABER AKIŞI ====================
-        async function fetchDailyShowcaseAndNews() {
-            const now = getEffectiveDate();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const dateKey = `${yyyy}-${mm}-${dd}`;
-            lastFetchedDateKey = dateKey;
+        function renderWorldCenters() {
+            const container = document.getElementById('world-centers-panel');
+            if (!container) return;
+            const now = new Date();
 
-            const collectedSlides = [];
-            try {
-                const wikiRes = await fetch(`https://tr.wikipedia.org/api/rest_v1/feed/featured/${yyyy}/${mm}/${dd}`);
-                if (wikiRes.ok) {
-                    const wiki = await wikiRes.json();
-                    if (wiki.image && wiki.image.image && wiki.image.image.source) {
-                        const descText = (wiki.image.description && wiki.image.description.text) ? wiki.image.description.text : 'Dünyadan seçkin doğa ve kültür karesi.';
-                        if (isSchoolSafe(descText)) {
-                            collectedSlides.push({
-                                category: 'GÜNÜN SEÇKİN GÖRSELİ',
-                                title: 'Dünyadan Günün Karesi',
-                                desc: descText.slice(0, 140),
-                                image: wiki.image.image.source
-                            });
-                        }
-                    }
-                    if (Array.isArray(wiki.onthisday)) {
-                        const safeEvents = wiki.onthisday.filter(ev => {
-                            const txt = `${ev.text || ''} ${(ev.pages && ev.pages[0] && ev.pages[0].title) || ''}`;
-                            return isSchoolSafe(txt) && isPreferredTopic(txt);
-                        });
-                        safeEvents.slice(0, 2).forEach(ev => {
-                            const p = ev.pages && ev.pages.find(pg => pg.thumbnail && pg.thumbnail.source);
-                            collectedSlides.push({
-                                category: `TARİHTE BUGÜN • ${ev.year || ''}`,
-                                title: (p && p.titles && p.titles.normalized) ? p.titles.normalized : 'Tarihte Bugün',
-                                desc: (ev.text || '').slice(0, 140),
-                                image: p ? p.thumbnail.source : FALLBACK_SLIDES[0].image
-                            });
-                        });
-                    }
-                }
-            } catch (e) {}
-
-            // Güncel Haberler (Spor, Doğa, Müzik - Sıkı Filtreli)
-            const rssFeeds = [
-                { tag: 'SPOR', color: 'teal', url: 'https://www.trthaber.com/spor_articles.rss' },
-                { tag: 'MÜZİK & SANAT', color: 'navy', url: 'https://www.trthaber.com/kultur_sanat_articles.rss' },
-                { tag: 'DOĞA & BİLİM', color: 'blue', url: 'https://www.trthaber.com/bilim_teknoloji_articles.rss' }
-            ];
-            const fetchedNews = [];
-            for (const feed of rssFeeds) {
+            container.innerHTML = WORLD_CENTERS.map((city, idx) => {
+                let localTime = '--:--';
                 try {
-                    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feed.url)}`;
-                    const r = await fetch(api);
-                    if (!r.ok) continue;
-                    const j = await r.json();
-                    if (j.status === 'ok' && Array.isArray(j.items)) {
-                        const safeItem = j.items.find(it => isSchoolSafe(`${it.title} ${it.description}`));
-                        if (safeItem) {
-                            const cleanDesc = String(safeItem.description || '').replace(/<[^>]+>/g, '').trim();
-                            fetchedNews.push({
-                                tag: feed.tag,
-                                color: feed.color,
-                                title: safeItem.title,
-                                desc: cleanDesc.slice(0, 120) || 'Güncel gelişme detayları.'
-                            });
-                            if (safeItem.thumbnail && collectedSlides.length < 5) {
-                                collectedSlides.push({
-                                    category: `GÜNCEL • ${feed.tag}`,
-                                    title: safeItem.title,
-                                    desc: cleanDesc.slice(0, 130),
-                                    image: safeItem.thumbnail
-                                });
-                            }
-                        }
-                    }
+                    localTime = new Intl.DateTimeFormat('tr-TR', {
+                        timeZone: city.tz,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                    }).format(now);
                 } catch (e) {}
-            }
 
-            if (fetchedNews.length > 0) {
-                currentNewsItems = fetchedNews.slice(0, 3);
-            } else {
-                currentNewsItems = deepClone(FALLBACK_NEWS);
-            }
+                const isFirst = idx === 0;
+                const rowClass = isFirst
+                    ? 'bg-brand-blue/10 dark:bg-brand-blue/20 border-brand-blue/30'
+                    : 'bg-slate-50/90 dark:bg-[#0F1422] border-slate-200/70 dark:border-slate-800';
+                const tempBadge = city.temp !== null ? `${city.temp}°C` : '--°C';
 
-            if (collectedSlides.length >= 2) {
-                showcaseSlides = collectedSlides;
-            } else {
-                const dayOffset = now.getDate() % FALLBACK_SLIDES.length;
-                const rotated = FALLBACK_SLIDES.slice(dayOffset).concat(FALLBACK_SLIDES.slice(0, dayOffset));
-                showcaseSlides = collectedSlides.concat(rotated).slice(0, 5);
-            }
-
-            currentSlideIdx = 0;
-            renderSlide();
-            renderNewsList();
+                return `
+                    <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border ${rowClass}">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="text-sm leading-none shrink-0">${city.flag}</span>
+                            <span class="font-display font-bold text-xs text-brand-navy dark:text-white truncate">${escapeHtml(city.name)}</span>
+                        </div>
+                        <div class="flex items-center gap-2.5 shrink-0">
+                            <span class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                                <span>${city.icon}</span>
+                                <span class="tabular-nums">${tempBadge}</span>
+                            </span>
+                            <span class="font-mono font-extrabold text-xs text-brand-navy dark:text-blue-300 tabular-nums w-11 text-right">${localTime}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        // ==================== TEMA & OTOMATİK KARANLIK MOD ====================
-        function applyTheme(mode) {
-            if (mode === 'dark') {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        function isWeatherDarkTrigger() {
-            if (currentLiveWeatherCode !== null) {
-                return decodeWmoWeather(currentLiveWeatherCode, true).darkTrigger;
-            }
-            const txt = `${state.weatherIcon} ${state.weatherText}`.toLocaleLowerCase('tr-TR');
-            return ['bulutlu', 'yağmur', 'sağanak', 'gök gürültü', 'sis', 'kar', '☁️', '🌧️', '⛈️', '❄️'].some(k => {
-                if (k === 'bulutlu' && (txt.includes('az bulutlu') || txt.includes('parçalı bulutlu'))) return false;
-                return txt.includes(k);
-            });
-        }
-
-        function isTimeInDarkRange(now) {
-            const cur = now.getHours() * 60 + now.getMinutes();
-            const start = timeToMinutes(state.autoDark.startTime || '17:30');
-            const end = timeToMinutes(state.autoDark.endTime || '07:30');
-            if (start === end) return false;
-            if (start > end) {
-                return cur >= start || cur < end;
-            }
-            return cur >= start && cur < end;
-        }
-
-        function evaluateAutoTheme() {
-            if (!state.autoDark || !state.autoDark.enabled) {
-                applyTheme(state.theme);
-                return;
-            }
-            const now = getEffectiveDate();
-            let shouldBeDark = false;
-            if (state.autoDark.byWeather && isWeatherDarkTrigger()) shouldBeDark = true;
-            if (state.autoDark.byTime && isTimeInDarkRange(now)) shouldBeDark = true;
-            applyTheme(shouldBeDark ? 'dark' : 'light');
-        }
-
-        // ==================== SAAT & SİMÜLASYON ====================
-        function getEffectiveDate() {
-            const real = new Date();
-            if (state.simulation && state.simulation.enabled) {
-                const d = new Date(real);
-                const targetDay = Number(state.simulation.dayIdx) || 1;
-                const diff = targetDay - d.getDay();
-                d.setDate(d.getDate() + diff);
-                const [hh, mm] = String(state.simulation.time || '09:15').split(':').map(Number);
-                d.setHours(hh || 0, mm || 0, real.getSeconds(), 0);
-                return d;
-            }
-            return real;
-        }
-
-        // ==================== RENDER FONKSİYONLARI ====================
-        function renderHeaderStatic() {
+        /* =========================================================
+           ÜST ÇUBUK, LOGO VE KAYAN DUYURU
+           ========================================================= */
+        function renderHeaderBranding() {
             document.getElementById('header-school-name').textContent = state.schoolName || 'CİHANGİR OKULLARI';
             document.getElementById('header-school-subtitle').textContent = state.schoolSubtitle || 'Kayseri Merkez Kampüs';
-            document.getElementById('header-weather-icon').textContent = state.weatherIcon || '🌤️';
-            document.getElementById('header-weather-text').textContent = state.weatherText || 'Kayseri Kocasinan';
-            document.getElementById('sim-badge').classList.toggle('hidden', !(state.simulation && state.simulation.enabled));
             document.getElementById('app-version-text').textContent = formatAppVersion();
 
-            const logoSvg = document.getElementById('header-logo-svg');
-            const logoImg = document.getElementById('header-logo-img');
+            const simBadge = document.getElementById('sim-badge');
+            simBadge.classList.toggle('hidden', !state.simulation?.enabled);
+
+            const svgEl = document.getElementById('header-logo-svg');
+            const imgEl = document.getElementById('header-logo-img');
             if (state.customLogo) {
-                logoImg.src = state.customLogo;
-                logoImg.classList.remove('hidden');
-                logoSvg.classList.add('hidden');
+                imgEl.src = state.customLogo;
+                imgEl.classList.remove('hidden');
+                svgEl.classList.add('hidden');
             } else {
-                logoImg.classList.add('hidden');
-                logoSvg.classList.remove('hidden');
+                imgEl.classList.add('hidden');
+                svgEl.classList.remove('hidden');
             }
         }
 
         function renderTicker() {
+            const track = document.getElementById('ticker-track');
             const lines = (state.tickerLines && state.tickerLines.length) ? state.tickerLines : DEFAULT_STATE.tickerLines;
-            const segment = lines.map(t => `<span class="inline-flex items-center mx-6"><span class="w-1.5 h-1.5 rounded-full bg-brand-teal mr-3"></span>${escapeHtml(t)}</span>`).join('');
-            document.getElementById('ticker-track').innerHTML = segment + segment;
+            const chunk = lines.map(line => `
+                <span class="inline-flex items-center mx-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-brand-teal mr-3 shrink-0"></span>
+                    <span>${escapeHtml(line)}</span>
+                </span>
+            `).join('');
+            track.innerHTML = chunk + chunk;
         }
 
-        function renderSlide() {
-            if (!showcaseSlides.length) return;
-            const slide = showcaseSlides[currentSlideIdx % showcaseSlides.length];
-            const imgEl = document.getElementById('slide-image');
-            imgEl.style.opacity = '0';
-            setTimeout(() => {
-                imgEl.src = slide.image || '';
-                imgEl.onerror = () => { imgEl.style.opacity = '0'; };
-                imgEl.onload = () => { imgEl.style.opacity = '1'; };
-            }, 150);
-
-            document.getElementById('slide-category').textContent = slide.category || 'GÜNÜN BİLGİSİ';
-            document.getElementById('slide-title').textContent = slide.title || '';
-            document.getElementById('slide-desc').textContent = slide.desc || '';
-
-            const dotsEl = document.getElementById('slide-dots');
-            dotsEl.innerHTML = showcaseSlides.map((_, idx) => {
-                const active = idx === (currentSlideIdx % showcaseSlides.length);
-                return `<button type="button" data-slide="${idx}" class="h-1.5 rounded-full transition-all ${active ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'}"></button>`;
-            }).join('');
-            dotsEl.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    currentSlideIdx = Number(btn.dataset.slide);
-                    renderSlide();
-                });
-            });
-        }
-
-        function computeBellStatus(now) {
+        /* =========================================================
+           ZİL SAYACI & GÜNLÜK DERS SAATLERİ
+           ========================================================= */
+        function computeBellState(now) {
+            const schedule = state.schedule || [];
             const day = now.getDay();
-            const secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-            const sched = state.schedule || [];
+            const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
-            if (day === 0 || day === 6 || sched.length === 0) {
-                return { type: 'off', label: 'HAFTA SONU', range: 'Tatil', countdown: '--:--', sub: 'İyi tatiller dileriz', next: 'Pazartesi görüşmek üzere', pct: 100, activePeriodIdx: -1 };
-            }
-
-            const firstStart = timeToMinutes(sched[0].start) * 60;
-            const lastEnd = timeToMinutes(sched[sched.length - 1].end) * 60;
-
-            if (secNow < firstStart) {
-                const rem = firstStart - secNow;
+            if (day === 0 || day === 6) {
                 return {
-                    type: 'before', label: 'OKUL ÖNCESİ', range: `${sched[0].start} Başlangıç`,
-                    countdown: formatCountdown(rem), sub: '1. Derse kalan süre',
-                    next: `Sıradaki: ${sched[0].name} • ${sched[0].start}`, pct: 0, activePeriodIdx: 0
+                    mode: 'weekend',
+                    label: 'HAFTA SONU',
+                    range: 'İyi Tatiller',
+                    remainingSec: 0,
+                    subLabel: 'Pazartesi 09:00’da görüşmek üzere',
+                    pct: 100,
+                    nextLine: 'Sıradaki: Pazartesi 1. Ders',
+                    activePeriodId: null
                 };
             }
 
-            if (secNow >= lastEnd) {
+            if (!schedule.length) {
                 return {
-                    type: 'after', label: 'DERSLER BİTTİ', range: `${sched[sched.length - 1].end} Çıkış`,
-                    countdown: '00:00', sub: 'Bugünkü dersler tamamlandı',
-                    next: 'İyi akşamlar dileriz', pct: 100, activePeriodIdx: -1
+                    mode: 'after',
+                    label: 'PROGRAM YOK',
+                    range: '--:--',
+                    remainingSec: 0,
+                    subLabel: 'Ayarlardan ders saatlerini ekleyin',
+                    pct: 0,
+                    nextLine: 'Ders tanımlanmadı',
+                    activePeriodId: null
                 };
             }
 
-            for (let i = 0; i < sched.length; i++) {
-                const sSec = timeToMinutes(sched[i].start) * 60;
-                const eSec = timeToMinutes(sched[i].end) * 60;
-                if (secNow >= sSec && secNow < eSec) {
-                    const rem = eSec - secNow;
-                    const pct = Math.min(100, Math.max(0, Math.round(((secNow - sSec) / (eSec - sSec)) * 100)));
-                    const nextItem = sched[i + 1];
-                    const isLunchNext = nextItem && (timeToMinutes(nextItem.start) - timeToMinutes(sched[i].end) >= 30);
+            const firstStart = parseHHMMToSec(schedule[0].start);
+            const lastEnd = parseHHMMToSec(schedule[schedule.length - 1].end);
+
+            if (nowSec < firstStart) {
+                const rem = firstStart - nowSec;
+                const total = Math.max(1800, rem);
+                return {
+                    mode: 'before',
+                    label: 'GÜN BAŞLIYOR',
+                    range: `İlk Ders ${schedule[0].start}`,
+                    remainingSec: rem,
+                    subLabel: '1. Ders ziline kalan süre',
+                    pct: Math.max(5, Math.min(95, Math.round((1 - rem / total) * 100))),
+                    nextLine: `Sıradaki: ${schedule[0].name} • ${schedule[0].start}`,
+                    activePeriodId: 1
+                };
+            }
+
+            for (let i = 0; i < schedule.length; i++) {
+                const p = schedule[i];
+                const pStart = parseHHMMToSec(p.start);
+                const pEnd = parseHHMMToSec(p.end);
+
+                if (nowSec >= pStart && nowSec < pEnd) {
+                    const total = Math.max(1, pEnd - pStart);
+                    const elapsed = nowSec - pStart;
+                    const rem = pEnd - nowSec;
+                    const nextP = schedule[i + 1];
+                    const isLunchNext = nextP && (parseHHMMToSec(nextP.start) - pEnd) >= 2400;
+                    const nextLabel = nextP
+                        ? (isLunchNext ? `Öğle Arası • ${p.end}` : `Teneffüs • ${p.end}`)
+                        : `Çıkış Zili • ${p.end}`;
                     return {
-                        type: 'lesson', label: sched[i].name.toUpperCase(), range: `${sched[i].start} - ${sched[i].end}`,
-                        countdown: formatCountdown(rem), sub: isLunchNext ? 'Öğle arasına kalan süre' : 'Teneffüse kalan süre',
-                        next: nextItem ? `Sıradaki: ${isLunchNext ? 'Öğle Arası' : 'Teneffüs'} • ${sched[i].end}` : `Çıkış Zili • ${sched[i].end}`,
-                        pct, activePeriodIdx: i
+                        mode: 'lesson',
+                        label: p.name.toUpperCase(),
+                        range: `${p.start} - ${p.end}`,
+                        remainingSec: rem,
+                        subLabel: nextP ? (isLunchNext ? 'Öğle arasına kalan süre' : 'Teneffüse kalan süre') : 'Okul çıkışına kalan süre',
+                        pct: Math.min(100, Math.max(0, Math.round((elapsed / total) * 100))),
+                        nextLine: `Sıradaki: ${nextLabel}`,
+                        activePeriodId: p.id
                     };
                 }
-                if (i < sched.length - 1) {
-                    const nextStart = timeToMinutes(sched[i + 1].start) * 60;
-                    if (secNow >= eSec && secNow < nextStart) {
-                        const rem = nextStart - secNow;
-                        const isLunch = (nextStart - eSec) >= 1800;
-                        const pct = Math.min(100, Math.max(0, Math.round(((secNow - eSec) / (nextStart - eSec)) * 100)));
+
+                const nextP = schedule[i + 1];
+                if (nextP) {
+                    const nextStart = parseHHMMToSec(nextP.start);
+                    if (nowSec >= pEnd && nowSec < nextStart) {
+                        const total = Math.max(1, nextStart - pEnd);
+                        const elapsed = nowSec - pEnd;
+                        const rem = nextStart - nowSec;
+                        const isLunch = total >= 2400;
                         return {
-                            type: 'break', label: isLunch ? 'ÖĞLE ARASI' : 'TENEFFÜS', range: `${sched[i].end} - ${sched[i + 1].start}`,
-                            countdown: formatCountdown(rem), sub: `${sched[i + 1].name} ziline kalan`,
-                            next: `Sıradaki: ${sched[i + 1].name} • ${sched[i + 1].start}`,
-                            pct, activePeriodIdx: i + 1
+                            mode: 'break',
+                            label: isLunch ? 'ÖĞLE ARASI' : 'TENEFFÜS',
+                            range: `${p.end} - ${nextP.start}`,
+                            remainingSec: rem,
+                            subLabel: `${nextP.name} ziline kalan süre`,
+                            pct: Math.min(100, Math.max(0, Math.round((elapsed / total) * 100))),
+                            nextLine: `Sıradaki: ${nextP.name} • ${nextP.start}`,
+                            activePeriodId: nextP.id
                         };
                     }
                 }
             }
-            return { type: 'off', label: 'OKUL DIŞI', range: '--:--', countdown: '--:--', sub: '', next: '', pct: 0, activePeriodIdx: -1 };
+
+            if (nowSec >= lastEnd) {
+                return {
+                    mode: 'after',
+                    label: 'DERSLER BİTTİ',
+                    range: `Çıkış ${schedule[schedule.length - 1].end}`,
+                    remainingSec: 0,
+                    subLabel: 'Bugünkü dersler tamamlandı',
+                    pct: 100,
+                    nextLine: 'İyi akşamlar dileriz',
+                    activePeriodId: null
+                };
+            }
+
+            return { mode: 'after', label: 'BEKLEMEDE', range: '', remainingSec: 0, subLabel: '', pct: 0, nextLine: '', activePeriodId: null };
         }
 
         function renderBellAndSchedule(now) {
-            const st = computeBellStatus(now);
-            document.getElementById('bell-status-label').textContent = st.label;
-            document.getElementById('bell-range-label').textContent = st.range;
-            document.getElementById('bell-countdown').textContent = st.countdown;
-            document.getElementById('bell-sub-label').textContent = st.sub;
-            document.getElementById('bell-next-line').textContent = st.next;
-            document.getElementById('bell-pct').textContent = `%${st.pct}`;
-            document.getElementById('bell-progress-bar').style.width = `${st.pct}%`;
+            const bell = computeBellState(now);
 
-            const dot = document.getElementById('bell-status-dot');
-            dot.className = `w-1.5 h-1.5 rounded-full animate-pulse ${st.type === 'break' ? 'bg-amber-400' : (st.type === 'lesson' ? 'bg-brand-teal' : 'bg-slate-400')}`;
+            document.getElementById('bell-status-label').textContent = bell.label;
+            document.getElementById('bell-range-label').textContent = bell.range;
+            document.getElementById('bell-countdown').textContent = bell.remainingSec > 0 ? formatMMSS(bell.remainingSec) : '--:--';
+            document.getElementById('bell-sub-label').textContent = bell.subLabel;
+            document.getElementById('bell-progress-bar').style.width = `${bell.pct}%`;
+            document.getElementById('bell-next-line').textContent = bell.nextLine;
+            document.getElementById('bell-pct').textContent = `%${bell.pct}`;
 
-            // Ders saatleri listesi
-            const secNow = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const pill = document.getElementById('bell-status-pill');
+            const bar = document.getElementById('bell-progress-bar');
+            if (bell.mode === 'break') {
+                pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-brand-teal/25 text-emerald-200 border border-brand-teal/40';
+                bar.className = 'h-full bg-amber-400 rounded-full transition-all duration-1000 ease-linear';
+            } else if (bell.mode === 'after' || bell.mode === 'weekend') {
+                pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-700/70 text-slate-200 border border-slate-600';
+                bar.className = 'h-full bg-slate-400 rounded-full transition-all duration-1000 ease-linear';
+            } else {
+                pill.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-brand-blue/25 text-blue-200 border border-brand-blue/40';
+                bar.className = 'h-full bg-brand-teal rounded-full transition-all duration-1000 ease-linear';
+            }
+
+            const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+            const isWeekday = now.getDay() >= 1 && now.getDay() <= 5;
             const listEl = document.getElementById('schedule-list');
-            listEl.innerHTML = (state.schedule || []).map((item, idx) => {
-                const sSec = timeToMinutes(item.start) * 60;
-                const eSec = timeToMinutes(item.end) * 60;
-                const isActive = st.type === 'lesson' && st.activePeriodIdx === idx;
-                const isPast = (now.getDay() >= 1 && now.getDay() <= 5) && secNow >= eSec;
+            listEl.innerHTML = (state.schedule || []).map(p => {
+                const s = parseHHMMToSec(p.start);
+                const e = parseHHMMToSec(p.end);
+                const isActive = isWeekday && nowSec >= s && nowSec < e;
+                const isPast = isWeekday && nowSec >= e;
+
+                const rowCls = isActive
+                    ? 'bg-brand-blue text-white border-brand-blue shadow-sm'
+                    : isPast
+                        ? 'bg-slate-50/70 dark:bg-[#0F1422]/60 text-slate-400 dark:text-slate-500 border-transparent'
+                        : 'bg-slate-50 dark:bg-[#0F1422] text-slate-700 dark:text-slate-200 border-slate-200/60 dark:border-slate-800';
+
                 return `
-                    <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs transition ${
-                        isActive
-                            ? 'bg-brand-blue text-white font-bold shadow-sm'
-                            : (isPast
-                                ? 'bg-slate-50/70 dark:bg-slate-800/30 text-slate-400 dark:text-slate-500'
-                                : 'bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 font-semibold')
-                    }">
-                        <span class="flex items-center gap-2 truncate">
-                            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : (isPast ? 'bg-slate-300 dark:bg-slate-600' : 'bg-brand-teal')}"></span>
-                            ${escapeHtml(item.name)}
+                    <div class="flex items-center justify-between px-2.5 py-1.5 rounded-xl border text-xs font-semibold transition ${rowCls}">
+                        <span class="flex items-center gap-2 min-w-0">
+                            <span class="w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white animate-pulse' : isPast ? 'bg-slate-300 dark:bg-slate-600' : 'bg-brand-blue/60'} shrink-0"></span>
+                            <span class="truncate">${escapeHtml(p.name)}</span>
                         </span>
-                        <span class="tabular-nums font-mono text-[11px] ${isActive ? 'text-blue-100' : ''}">${escapeHtml(item.start)} - ${escapeHtml(item.end)}</span>
+                        <span class="tabular-nums text-[11px] ${isActive ? 'text-blue-100 font-bold' : ''}">${escapeHtml(p.start)} - ${escapeHtml(p.end)}</span>
                     </div>
                 `;
             }).join('');
 
-            return st;
+            return bell;
         }
 
-        function renderClassesGrid(now, bellStatus) {
-            const classNames = Object.keys(state.classPrograms || {});
-            const perPage = 4;
-            const totalPages = Math.max(1, Math.ceil(classNames.length / perPage));
-            currentClassPage = currentClassPage % totalPages;
-
-            const dayKey = String((now.getDay() >= 1 && now.getDay() <= 5) ? now.getDay() : 1);
-            const periodIdx = bellStatus.activePeriodIdx >= 0 ? bellStatus.activePeriodIdx : 0;
-            const periodName = (state.schedule[periodIdx] && state.schedule[periodIdx].name) ? state.schedule[periodIdx].name : '1. Ders';
-
-            document.getElementById('timetable-period-badge').textContent = bellStatus.type === 'break' ? `Sıradaki: ${periodName}` : periodName;
-            document.getElementById('timetable-page-indicator').textContent = `Sayfa ${currentClassPage + 1}/${totalPages}`;
-
-            const slice = classNames.slice(currentClassPage * perPage, currentClassPage * perPage + perPage);
+        /* =========================================================
+           ŞU AN SINIFLARDA (16 ORTAOKUL ŞUBESİ, 4 SAYFA)
+           ========================================================= */
+        function renderClassesGrid(now, bell) {
+            const programs = state.classPrograms || {};
+            const classNames = Object.keys(programs);
             const grid = document.getElementById('classes-grid');
+            const badge = document.getElementById('timetable-period-badge');
+            const pageInd = document.getElementById('timetable-page-indicator');
+
+            const dayIdx = (now.getDay() >= 1 && now.getDay() <= 5) ? now.getDay() : 1;
+            const periodIdx = bell?.activePeriodId ? Math.max(0, bell.activePeriodId - 1) : 0;
+
+            if (bell?.mode === 'lesson') {
+                badge.textContent = `${periodIdx + 1}. Ders`;
+            } else if (bell?.mode === 'break') {
+                badge.textContent = `Sonraki: ${periodIdx + 1}. Ders`;
+            } else if (bell?.mode === 'before') {
+                badge.textContent = `İlk Ders: 1. Ders`;
+            } else {
+                badge.textContent = `${DAY_NAMES[dayIdx]} • 1. Ders`;
+            }
+
+            if (!classNames.length) {
+                grid.innerHTML = `<div class="col-span-2 row-span-2 flex items-center justify-center text-xs text-slate-400">Tanımlı sınıf bulunmuyor.</div>`;
+                pageInd.textContent = 'Sayfa 0/0';
+                return;
+            }
+
+            const pageSize = 4;
+            const totalPages = Math.max(1, Math.ceil(classNames.length / pageSize));
+            currentClassPage = currentClassPage % totalPages;
+            pageInd.textContent = `Sayfa ${currentClassPage + 1}/${totalPages}`;
+
+            const slice = classNames.slice(currentClassPage * pageSize, currentClassPage * pageSize + pageSize);
             grid.innerHTML = slice.map(cls => {
-                const dayArr = (state.classPrograms[cls] && state.classPrograms[cls][dayKey]) || [];
-                const lesson = dayArr[periodIdx] || { subject: 'Serbest Çalışma', teacher: '-' };
+                const daySchedule = programs[cls]?.[dayIdx] || programs[cls]?.[String(dayIdx)] || [];
+                const lesson = daySchedule[periodIdx] || { subject: 'Serbest / Etüt', teacher: '-' };
                 return `
-                    <div class="rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/80 dark:border-slate-800 p-3 flex flex-col justify-between min-w-0">
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="px-2 py-0.5 rounded-lg bg-brand-navy dark:bg-brand-blue text-white font-display font-extrabold text-xs">${escapeHtml(cls)}</span>
-                            <span class="w-2 h-2 rounded-full bg-brand-teal shrink-0"></span>
+                    <div class="rounded-xl bg-slate-50 dark:bg-[#0F1422] border border-slate-200/80 dark:border-slate-800 p-2.5 flex flex-col justify-between min-w-0 overflow-hidden">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <span class="px-2 py-0.5 rounded-lg bg-brand-navy dark:bg-brand-blue text-white font-display font-extrabold text-xs shrink-0">${escapeHtml(cls)}</span>
+                            <span class="w-1.5 h-1.5 rounded-full ${bell?.mode === 'lesson' ? 'bg-brand-teal' : 'bg-slate-300 dark:bg-slate-600'} shrink-0"></span>
                         </div>
-                        <div class="mt-1.5 min-w-0">
-                            <div class="font-display font-bold text-sm text-brand-navy dark:text-white truncate">${escapeHtml(lesson.subject || '-')}</div>
-                            <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-300 truncate">${escapeHtml(lesson.teacher || '-')}</div>
+                        <div class="min-w-0 mt-1">
+                            <div class="font-display font-bold text-xs sm:text-sm text-brand-navy dark:text-white truncate">${escapeHtml(lesson.subject || 'Ders Yok')}</div>
+                            <div class="text-[11px] font-medium text-slate-500 dark:text-slate-300 truncate">${escapeHtml(lesson.teacher || '-')}</div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        function renderDutyCard(now) {
-            const rawDay = now.getDay();
-            const dayKey = String((rawDay >= 1 && rawDay <= 5) ? rawDay : 1);
-            const dayName = DAYS_TR[Number(dayKey)];
-            document.getElementById('duty-day-badge').textContent = `${dayName} Nöbeti`;
+        /* =========================================================
+           GÜNÜN NÖBETÇİLERİ (SAYFALAMALI, TAŞMASIZ)
+           ========================================================= */
+        function renderDutyList(now) {
+            const dayIdx = (now.getDay() >= 1 && now.getDay() <= 5) ? now.getDay() : 1;
+            const badge = document.getElementById('duty-day-badge');
+            const listEl = document.getElementById('duty-teachers-list');
+            const pageBtn = document.getElementById('duty-page-indicator');
 
-            const list = (state.dutyByDay && state.dutyByDay[dayKey]) ? state.dutyByDay[dayKey] : [];
-            const perPage = 8;
-            const totalPages = Math.max(1, Math.ceil(list.length / perPage));
+            badge.textContent = `${DAY_NAMES[dayIdx]} Nöbeti`;
+
+            const allDuties = (state.dutyByDay?.[dayIdx] || state.dutyByDay?.[String(dayIdx)] || [])
+                .filter(item => item && (item.area || item.teacher));
+
+            // Öğretmeni dolu olanları öncelikli göster, sonra boş alanlar
+            const filled = allDuties.filter(d => d.teacher && d.teacher.trim() !== '');
+            const displayList = filled.length ? filled : allDuties;
+
+            const pageSize = 6;
+            const totalPages = Math.max(1, Math.ceil(displayList.length / pageSize));
             currentDutyPage = currentDutyPage % totalPages;
 
-            const pageBtn = document.getElementById('duty-page-indicator');
             if (totalPages > 1) {
-                pageBtn.classList.remove('hidden');
                 pageBtn.textContent = `${currentDutyPage + 1}/${totalPages}`;
+                pageBtn.classList.remove('hidden');
             } else {
                 pageBtn.classList.add('hidden');
             }
 
-            const slice = list.slice(currentDutyPage * perPage, currentDutyPage * perPage + perPage);
-            const container = document.getElementById('duty-teachers-list');
-            container.innerHTML = slice.map(item => `
-                <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 text-xs">
-                    <span class="font-bold text-slate-600 dark:text-slate-300 truncate">${escapeHtml(item.area)}</span>
-                    <span class="font-semibold text-brand-navy dark:text-white truncate text-right">${escapeHtml(item.teacher || '—')}</span>
+            const slice = displayList.slice(currentDutyPage * pageSize, currentDutyPage * pageSize + pageSize);
+            if (!slice.length) {
+                listEl.innerHTML = `<div class="text-xs text-slate-400 text-center py-6">Bu gün için nöbet kaydı bulunmuyor.</div>`;
+                return;
+            }
+
+            listEl.innerHTML = slice.map(item => `
+                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0F1422] border border-slate-200/70 dark:border-slate-800">
+                    <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-blue dark:text-blue-300 shrink-0">
+                        <span class="w-1.5 h-1.5 rounded-full bg-brand-teal"></span>
+                        ${escapeHtml(item.area || 'Alan')}
+                    </span>
+                    <span class="text-xs font-bold text-slate-800 dark:text-white truncate text-right">
+                        ${escapeHtml(item.teacher || 'Atanmadı')}
+                    </span>
                 </div>
             `).join('');
         }
 
-        function renderNoticesList() {
-            const colorMap = {
-                red:  { badge: 'bg-brand-red/15 text-brand-red dark:bg-red-500/20 dark:text-red-300', border: 'border-l-brand-red' },
-                blue: { badge: 'bg-brand-blue/15 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300', border: 'border-l-brand-blue' },
-                teal: { badge: 'bg-brand-teal/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300', border: 'border-l-brand-teal' },
-                navy: { badge: 'bg-slate-200 text-brand-navy dark:bg-slate-700 dark:text-slate-200', border: 'border-l-brand-navy dark:border-l-brand-blue' }
-            };
+        /* =========================================================
+           SAĞ ALT PANEL: DUYURULAR / HABERLER / YEMEK MENÜSÜ / DÜNYA
+           ========================================================= */
+        function renderNotices() {
             const el = document.getElementById('campus-notices-list');
-            el.innerHTML = (state.notices || []).slice(0, 3).map(n => {
-                const c = colorMap[n.color] || colorMap.blue;
-                return `
-                    <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 border-l-4 ${c.border} min-w-0">
-                        <div class="flex items-center gap-2 mb-0.5">
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${c.badge} shrink-0">${escapeHtml(n.tag)}</span>
-                            <h4 class="font-display font-bold text-xs text-brand-navy dark:text-white truncate">${escapeHtml(n.title)}</h4>
-                        </div>
-                        <p class="text-[11px] text-slate-600 dark:text-slate-300 truncate">${escapeHtml(n.desc)}</p>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderNewsList() {
             const colorMap = {
-                teal: 'bg-brand-teal/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
-                blue: 'bg-brand-blue/15 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300',
-                navy: 'bg-slate-200 text-brand-navy dark:bg-slate-700 dark:text-slate-200'
+                red:   'bg-red-100 text-brand-red dark:bg-red-500/20 dark:text-red-300',
+                blue:  'bg-blue-100 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300',
+                teal:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+                amber: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
             };
-            const el = document.getElementById('current-news-list');
-            el.innerHTML = (currentNewsItems || []).slice(0, 3).map(n => `
-                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 min-w-0">
+            el.innerHTML = (state.notices || []).slice(0, 3).map(n => `
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0F1422] border border-slate-200/70 dark:border-slate-800 min-w-0">
                     <div class="flex items-center gap-2 mb-0.5">
-                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${colorMap[n.color] || colorMap.blue} shrink-0">${escapeHtml(n.tag)}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider shrink-0 ${colorMap[n.color] || colorMap.blue}">${escapeHtml(n.tag || 'DUYURU')}</span>
                         <h4 class="font-display font-bold text-xs text-brand-navy dark:text-white truncate">${escapeHtml(n.title)}</h4>
                     </div>
                     <p class="text-[11px] text-slate-600 dark:text-slate-300 truncate">${escapeHtml(n.desc)}</p>
@@ -1593,303 +1893,384 @@
             `).join('');
         }
 
-        function renderDailyMenu(now) {
-            const rawDay = now.getDay();
-            const dayKey = String((rawDay >= 1 && rawDay <= 5) ? rawDay : 1);
-            const m = (state.menuByDay && state.menuByDay[dayKey]) || DEFAULT_STATE.menuByDay['1'];
-            const rows = [
-                { icon: '🍲', label: 'Çorba', val: m.soup },
-                { icon: '🍽️', label: 'Ana Yemek', val: m.main },
-                { icon: '🍚', label: 'Yardımcı', val: m.side },
-                { icon: '🥤', label: 'Tatlı / İçecek', val: m.extra }
-            ];
-            document.getElementById('daily-menu-panel').innerHTML = rows.map(r => `
-                <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800 text-xs">
-                    <span class="font-bold text-slate-500 dark:text-slate-300 flex items-center gap-1.5 shrink-0">${r.icon} ${r.label}</span>
-                    <span class="font-bold text-brand-navy dark:text-white truncate text-right">${escapeHtml(r.val || '-')}</span>
+        function renderNewsList() {
+            const el = document.getElementById('current-news-list');
+            const colorMap = {
+                teal:  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+                blue:  'bg-blue-100 text-brand-blue dark:bg-blue-500/20 dark:text-blue-300',
+                amber: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
+            };
+            const list = (liveNews && liveNews.length) ? liveNews.slice(0, 3) : FALLBACK_NEWS;
+            el.innerHTML = list.map(item => `
+                <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-[#0F1422] border border-slate-200/70 dark:border-slate-800 min-w-0">
+                    <div class="flex items-center justify-between gap-2 mb-0.5">
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider shrink-0 ${colorMap[item.color] || colorMap.blue}">${escapeHtml(item.category || 'HABER')}</span>
+                        <span class="text-[10px] font-semibold text-slate-400 truncate">${escapeHtml(item.source || '')} • ${escapeHtml(item.time || '')}</span>
+                    </div>
+                    <h4 class="font-display font-bold text-xs text-brand-navy dark:text-white leading-snug line-clamp-2">${escapeHtml(item.title)}</h4>
                 </div>
             `).join('');
         }
 
-        function renderWorldCenters() {
-            const now = new Date();
-            const container = document.getElementById('world-centers-panel');
-            container.innerHTML = WORLD_CENTERS.map((c, idx) => {
-                let localTime = '--:--';
-                try {
-                    localTime = new Intl.DateTimeFormat('tr-TR', {
-                        timeZone: c.tz,
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    }).format(now);
-                } catch (e) {}
-                const isFirst = idx === 0;
-                return `
-                    <div class="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl ${
-                        isFirst
-                            ? 'bg-brand-blue/10 dark:bg-brand-blue/20 border border-brand-blue/30'
-                            : 'bg-slate-50 dark:bg-[#0D111D] border border-slate-200/70 dark:border-slate-800'
-                    } text-xs min-w-0">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span class="text-sm leading-none shrink-0">${c.flag}</span>
-                            <span class="font-display font-bold ${isFirst ? 'text-brand-blue dark:text-blue-300' : 'text-brand-navy dark:text-white'} truncate">${escapeHtml(c.name)}</span>
-                        </div>
-                        <div class="flex items-center gap-2.5 shrink-0">
-                            <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                                <span>${c.icon}</span>
-                                <span class="tabular-nums">${escapeHtml(c.temp)}</span>
-                            </span>
-                            <span class="font-mono font-extrabold text-xs px-2 py-0.5 rounded-md bg-white dark:bg-[#141928] text-brand-navy dark:text-white border border-slate-200/80 dark:border-slate-700 tabular-nums">
-                                ${localTime}
-                            </span>
-                        </div>
+        function renderDailyMenu(now) {
+            const el = document.getElementById('daily-menu-panel');
+            const dayIdx = (now.getDay() >= 1 && now.getDay() <= 5) ? now.getDay() : 1;
+            const menu = state.menuByDay?.[dayIdx] || state.menuByDay?.[String(dayIdx)] || DEFAULT_STATE.menuByDay[1];
+
+            const rows = [
+                { icon: '🥣', label: 'Çorba', val: menu.soup },
+                { icon: '🍽️', label: 'Ana Yemek', val: menu.main },
+                { icon: '🥗', label: 'Yardımcı', val: menu.side },
+                { icon: '🍎', label: 'Tatlı / İçecek', val: menu.extra }
+            ];
+
+            el.innerHTML = `
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-brand-teal px-1">
+                    ${DAY_NAMES[dayIdx]} Günün Yemek Menüsü
+                </div>
+                ${rows.map(r => `
+                    <div class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0F1422] border border-slate-200/70 dark:border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 shrink-0">
+                            <span>${r.icon}</span>
+                            <span>${r.label}</span>
+                        </span>
+                        <span class="text-xs font-bold text-brand-navy dark:text-white truncate text-right">${escapeHtml(r.val || '-')}</span>
                     </div>
-                `;
-            }).join('');
+                `).join('')}
+            `;
         }
 
-        function setRightPanel(panel) {
-            activeRightPanel = panel;
+        function setRightPanel(panelName) {
+            activeRightPanel = panelName;
             const panels = {
-                notices: { btn: 'btn-panel-notices', box: 'campus-notices-list', dot: 'bg-brand-red' },
-                news:    { btn: 'btn-panel-news',    box: 'current-news-list',   dot: 'bg-brand-blue' },
-                menu:    { btn: 'btn-panel-menu',    box: 'daily-menu-panel',    dot: 'bg-brand-teal' },
-                world:   { btn: 'btn-panel-world',   box: 'world-centers-panel', dot: 'bg-amber-500' }
+                notices: document.getElementById('campus-notices-list'),
+                news:    document.getElementById('current-news-list'),
+                menu:    document.getElementById('daily-menu-panel'),
+                world:   document.getElementById('world-centers-panel')
             };
-            Object.keys(panels).forEach(key => {
-                const p = panels[key];
-                const btn = document.getElementById(p.btn);
-                const box = document.getElementById(p.box);
-                const isActive = key === panel;
-                box.classList.toggle('hidden', !isActive);
-                if (isActive) {
-                    btn.className = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-brand-navy text-white dark:bg-brand-blue transition whitespace-nowrap shrink-0';
-                    document.getElementById('notices-news-dot').className = `w-2 h-2 rounded-full ${p.dot} shrink-0`;
-                } else {
-                    btn.className = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0';
-                }
+            const buttons = {
+                notices: document.getElementById('btn-panel-notices'),
+                news:    document.getElementById('btn-panel-news'),
+                menu:    document.getElementById('btn-panel-menu'),
+                world:   document.getElementById('btn-panel-world')
+            };
+
+            const activeCls = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-brand-navy text-white dark:bg-brand-blue transition whitespace-nowrap shrink-0';
+            const idleCls   = 'px-2 py-1 rounded-lg font-display font-bold text-[10px] uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition whitespace-nowrap shrink-0';
+
+            RIGHT_PANELS.forEach(key => {
+                panels[key].classList.toggle('hidden', key !== panelName);
+                buttons[key].className = key === panelName ? activeCls : idleCls;
             });
-            if (panel === 'world') renderWorldCenters();
+
+            const dot = document.getElementById('notices-news-dot');
+            const dotColors = { notices: 'bg-brand-red', news: 'bg-brand-blue', menu: 'bg-brand-teal', world: 'bg-amber-400' };
+            dot.className = `w-2 h-2 rounded-full shrink-0 ${dotColors[panelName] || 'bg-brand-red'}`;
+
+            if (panelName === 'world') renderWorldCenters();
         }
 
-        // ==================== ANA DÖNGÜ ====================
-        function tickBoard() {
-            const now = getEffectiveDate();
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mm = String(now.getMinutes()).padStart(2, '0');
-            const ss = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('header-clock').textContent = `${hh}:${mm}:${ss}`;
-            document.getElementById('header-date').textContent = `${now.getDate()} ${MONTHS_TR[now.getMonth()]} ${DAYS_TR[now.getDay()]}`;
+        /* =========================================================
+           GÖRSEL VİTRİN (SLAYT GÖSTERİSİ)
+           ========================================================= */
+        function renderSlide() {
+            if (!slides || !slides.length) slides = [...FALLBACK_SLIDES];
+            currentSlideIdx = ((currentSlideIdx % slides.length) + slides.length) % slides.length;
+            const slide = slides[currentSlideIdx];
 
-            const bellStatus = renderBellAndSchedule(now);
-            renderClassesGrid(now, bellStatus);
-            renderDutyCard(now);
-            renderDailyMenu(now);
-            if (activeRightPanel === 'world') renderWorldCenters();
-            evaluateAutoTheme();
+            const imgEl = document.getElementById('slide-image');
+            const catEl = document.getElementById('slide-category');
+            const titleEl = document.getElementById('slide-title');
+            const descEl = document.getElementById('slide-desc');
+            const dotsEl = document.getElementById('slide-dots');
 
-            const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-            if (lastFetchedDateKey && dateKey !== lastFetchedDateKey) {
-                fetchDailyShowcaseAndNews();
+            catEl.textContent = slide.category || 'GÜNÜN BİLGİSİ';
+            titleEl.textContent = slide.title || '';
+            descEl.textContent = slide.desc || '';
+
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                if (slide.image) {
+                    imgEl.onerror = () => {
+                        imgEl.style.opacity = '0';
+                    };
+                    imgEl.onload = () => {
+                        imgEl.style.opacity = '1';
+                    };
+                    imgEl.src = slide.image;
+                } else {
+                    imgEl.removeAttribute('src');
+                    imgEl.style.opacity = '0';
+                }
+            }, 150);
+
+            dotsEl.innerHTML = slides.map((_, idx) => `
+                <button type="button" data-slide-idx="${idx}" class="h-1.5 rounded-full transition-all ${idx === currentSlideIdx ? 'w-5 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'}"></button>
+            `).join('');
+
+            dotsEl.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentSlideIdx = parseInt(btn.dataset.slideIdx, 10) || 0;
+                    renderSlide();
+                });
+            });
+        }
+
+        /* =========================================================
+           İNTERNETTEN GÜNCEL HABERLER & TARİHTE BUGÜN (3 GÜN + SPOR/OKUL FİLTRESİ)
+           ========================================================= */
+        async function fetchDailyInternetContent(isManual = false) {
+            const refreshIcon = document.getElementById('icon-refresh-news');
+            if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+            const halfHourSlot = Math.floor(Date.now() / (30 * 60 * 1000));
+            const newSlides = [];
+            const fetchedNews = [];
+
+            // 1. TRT Haber RSS (Spor, Eğitim, Bilim-Teknoloji) — Son 3 gün + Okula uygun filtre
+            const rssSources = [
+                { url: 'https://www.trthaber.com/spor_articles.rss', category: 'SPOR', color: 'teal' },
+                { url: 'https://www.trthaber.com/egitim_articles.rss', category: 'EĞİTİM', color: 'blue' },
+                { url: 'https://www.trthaber.com/bilim_teknoloji_articles.rss', category: 'BİLİM & OKUL', color: 'amber' }
+            ];
+
+            for (const src of rssSources) {
+                try {
+                    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(src.url)}`;
+                    const res = await fetch(apiUrl);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    if (!Array.isArray(data.items)) continue;
+
+                    const validItems = data.items.filter(item => {
+                        const combined = `${item.title || ''} ${item.description || ''}`;
+                        if (!isSafeSchoolText(combined)) return false;
+                        if (!isRecentNewsItem(item.pubDate, 3)) return false;
+                        return src.category === 'SPOR' || isPreferredTopic(combined);
+                    });
+
+                    if (validItems.length) {
+                        const pick = validItems[halfHourSlot % validItems.length];
+                        const pub = new Date(pick.pubDate.replace(' ', 'T'));
+                        const timeStr = isNaN(pub.getTime())
+                            ? 'Güncel'
+                            : `${String(pub.getDate()).padStart(2, '0')}.${String(pub.getMonth() + 1).padStart(2, '0')} ${String(pub.getHours()).padStart(2, '0')}:${String(pub.getMinutes()).padStart(2, '0')}`;
+
+                        fetchedNews.push({
+                            category: src.category,
+                            color: src.color,
+                            title: (pick.title || '').trim(),
+                            source: 'TRT Haber',
+                            time: timeStr
+                        });
+
+                        const thumb = pick.thumbnail || pick.enclosure?.link || '';
+                        if (thumb) {
+                            newSlides.push({
+                                category: `${src.category} GÜNDEMİ`,
+                                title: (pick.title || '').trim(),
+                                desc: (pick.description || '').replace(/<[^>]+>/g, '').trim().slice(0, 140),
+                                image: thumb
+                            });
+                        }
+                    }
+                } catch (err) {
+                    // Sessiz yedekleme
+                }
+            }
+
+            // 2. Wikipedia Tarihte Bugün (Türkçe, okula uygun & Michael Jackson / Yusuf Tekin hariç)
+            try {
+                const now = new Date();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const wikiUrl = `https://api.wikimedia.org/feed/v1/wikipedia/tr/onthisday/events/${mm}/${dd}`;
+                const res = await fetch(wikiUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    const events = (data.events || []).filter(ev => {
+                        const txt = `${ev.text || ''} ${ev.pages?.[0]?.title || ''}`;
+                        return isSafeSchoolText(txt) && isPreferredTopic(txt);
+                    });
+                    if (events.length) {
+                        const ev = events[halfHourSlot % events.length];
+                        const img = ev.pages?.[0]?.originalimage?.source || ev.pages?.[0]?.thumbnail?.source || FALLBACK_SLIDES[0].image;
+                        newSlides.push({
+                            category: `TARİHTE BUGÜN (${ev.year})`,
+                            title: ev.pages?.[0]?.normalizedtitle || `${ev.year} Yılında Bugün`,
+                            desc: ev.text || '',
+                            image: img
+                        });
+                    }
+                }
+            } catch (err) {
+                // Sessiz yedekleme
+            }
+
+            // Yedeklerle tamamla (her 30 dakikada döngüsel seçim)
+            const rotatedFallbacks = FALLBACK_SLIDES.map((_, i) => FALLBACK_SLIDES[(i + halfHourSlot) % FALLBACK_SLIDES.length]);
+            slides = newSlides.length >= 2 ? [...newSlides, rotatedFallbacks[0]] : [...newSlides, ...rotatedFallbacks.slice(0, 3)];
+            liveNews = fetchedNews.length ? [...fetchedNews, ...FALLBACK_NEWS].slice(0, 3) : [...FALLBACK_NEWS];
+
+            currentSlideIdx = 0;
+            renderSlide();
+            renderNewsList();
+
+            if (refreshIcon) {
+                setTimeout(() => refreshIcon.classList.remove('animate-spin'), 450);
+            }
+            if (isManual) {
+                setRightPanel('news');
+                showToast('Haberler ve vitrin içerikleri güncellendi.', 'success');
             }
         }
 
-        // ==================== QR KOD KORUMA SİSTEMİ ====================
-        let currentQrPin = '';
-        let qrSecondsLeft = 120;
-        let qrTimerInterval = null;
+        /* =========================================================
+           ZAMANLAYICILARI YÖNETME
+           ========================================================= */
+        function restartRotationTimers() {
+            clearInterval(slideTimerId);
+            clearInterval(panelTimerId);
+            clearInterval(newsTimerId);
 
+            const slideMs = Math.max(3, parseInt(state.intervals?.slideSec, 10) || 12) * 1000;
+            const panelMs = Math.max(3, parseInt(state.intervals?.panelSec, 10) || 12) * 1000;
+            const newsMs  = Math.max(5, parseInt(state.intervals?.newsMin, 10) || 30) * 60 * 1000;
+
+            slideTimerId = setInterval(() => {
+                currentSlideIdx++;
+                renderSlide();
+            }, slideMs);
+
+            panelTimerId = setInterval(() => {
+                const idx = RIGHT_PANELS.indexOf(activeRightPanel);
+                const nextKey = RIGHT_PANELS[(idx + 1) % RIGHT_PANELS.length];
+                setRightPanel(nextKey);
+            }, panelMs);
+
+            newsTimerId = setInterval(() => {
+                fetchDailyInternetContent(false);
+            }, newsMs);
+        }
+
+        /* =========================================================
+           ANA SANİYELİK DÖNGÜ
+           ========================================================= */
+        let lastDayKey = '';
+        function tickBoard() {
+            const now = getEffectiveNow();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            const ss = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('header-clock').textContent = `${hh}:${mm}:${ss}`;
+            document.getElementById('header-date').textContent = `${now.getDate()} ${MONTH_NAMES[now.getMonth()]} ${DAY_NAMES[now.getDay()]}`;
+
+            applyTheme(now);
+            const bell = renderBellAndSchedule(now);
+            renderClassesGrid(now, bell);
+
+            const dayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getDay()}`;
+            if (dayKey !== lastDayKey) {
+                lastDayKey = dayKey;
+                renderDutyList(now);
+                renderDailyMenu(now);
+            }
+
+            if (activeRightPanel === 'world') {
+                renderWorldCenters();
+            }
+        }
+
+        /* =========================================================
+           QR KOD GÜVENLİK KİLİDİ
+           ========================================================= */
         function generateQrChallenge() {
             currentQrPin = String(Math.floor(10000 + Math.random() * 90000));
-            qrSecondsLeft = 120;
-            document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrSecondsLeft} sn`;
-            document.getElementById('qr-pin-error').classList.add('hidden');
-            const pinInput = document.getElementById('inp-qr-pin');
-            pinInput.value = '';
+            qrExpireSeconds = 120;
 
-            const qrBox = document.getElementById('qr-code-container');
-            qrBox.innerHTML = '';
+            const container = document.getElementById('qr-code-container');
+            container.innerHTML = '';
+            const payload = `Cihangir Okulları Pano Doğrulama Kodu: ${currentQrPin}`;
+
             if (typeof QRCode !== 'undefined') {
-                new QRCode(qrBox, {
-                    text: `Cihangir Okullari Pano Kodu: ${currentQrPin}`,
-                    width: 172,
-                    height: 172,
+                new QRCode(container, {
+                    text: payload,
+                    width: 176,
+                    height: 176,
                     colorDark: '#1B2033',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.M
                 });
             } else {
-                qrBox.innerHTML = `<div class="text-xs font-mono font-bold text-slate-700 p-2">Kod: ${currentQrPin}</div>`;
+                container.innerHTML = `<div class="text-xs font-bold text-slate-600 p-4">QR kütüphanesi yüklenemedi.<br>Yönetici kodu ile giriş yapabilirsiniz.</div>`;
             }
 
-            clearInterval(qrTimerInterval);
-            qrTimerInterval = setInterval(() => {
-                qrSecondsLeft--;
-                if (qrSecondsLeft <= 0) {
+            document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrExpireSeconds} sn`;
+            document.getElementById('qr-pin-error').classList.add('hidden');
+            document.getElementById('inp-qr-pin').value = '';
+
+            clearInterval(qrCountdownId);
+            qrCountdownId = setInterval(() => {
+                qrExpireSeconds--;
+                if (qrExpireSeconds <= 0) {
                     generateQrChallenge();
                 } else {
-                    document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrSecondsLeft} sn`;
+                    document.getElementById('qr-expire-label').textContent = `Kod geçerliliği: ${qrExpireSeconds} sn`;
                 }
             }, 1000);
         }
 
         function openQrLockModal() {
+            if (!state.qrProtection) {
+                openSettingsModal();
+                return;
+            }
             document.getElementById('qr-lock-modal').classList.remove('hidden');
             generateQrChallenge();
-            setTimeout(() => document.getElementById('inp-qr-pin').focus(), 100);
+            setTimeout(() => document.getElementById('inp-qr-pin').focus(), 80);
         }
 
         function closeQrLockModal() {
-            clearInterval(qrTimerInterval);
             document.getElementById('qr-lock-modal').classList.add('hidden');
+            clearInterval(qrCountdownId);
         }
 
         function verifyQrPin() {
-            const val = document.getElementById('inp-qr-pin').value.trim();
-            if (val.toLowerCase() === ADMIN_MASTER_CODE || val === currentQrPin) {
+            const rawVal = document.getElementById('inp-qr-pin').value.trim();
+            if (rawVal.toLowerCase() === MASTER_ADMIN_CODE || (rawVal === currentQrPin && qrExpireSeconds > 0)) {
                 closeQrLockModal();
                 openSettingsModal();
-            } else {
-                document.getElementById('qr-pin-error').classList.remove('hidden');
+                return true;
             }
+            document.getElementById('qr-pin-error').classList.remove('hidden');
+            return false;
         }
 
-        // ==================== AYARLAR MODALI ====================
+        /* =========================================================
+           AYARLAR MODALI DÜZENLEYİCİLERİ
+           ========================================================= */
         function switchModalTab(tabName) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            const activePanel = document.getElementById(`tab-${tabName}`);
+            if (activePanel) activePanel.classList.remove('hidden');
+
             document.querySelectorAll('.modal-tab').forEach(btn => {
-                const active = btn.dataset.tab === tabName;
-                btn.classList.toggle('border-brand-blue', active);
-                btn.classList.toggle('text-brand-blue', active);
-                btn.classList.toggle('border-transparent', !active);
-            });
-            document.querySelectorAll('.tab-panel').forEach(p => {
-                p.classList.toggle('hidden', p.id !== `tab-${tabName}`);
-            });
-        }
-
-        function renderModalDutyEditor() {
-            const dayKey = document.getElementById('inp-duty-day-select').value;
-            const list = draftState.dutyByDay[dayKey] || [];
-            const container = document.getElementById('modal-duty-editor');
-            container.innerHTML = list.map((item, idx) => `
-                <div class="grid grid-cols-12 gap-2 items-center">
-                    <input type="text" data-duty-field="area" data-idx="${idx}" value="${escapeHtml(item.area)}" placeholder="Nöbet Yeri"
-                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
-                    <input type="text" data-duty-field="teacher" data-idx="${idx}" value="${escapeHtml(item.teacher)}" placeholder="Nöbetçi Öğretmen"
-                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-                    <button type="button" data-duty-del="${idx}" class="col-span-2 py-2 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-500/15 dark:hover:bg-red-500/25 text-brand-red dark:text-red-300 text-xs font-bold transition">Sil</button>
-                </div>
-            `).join('');
-
-            container.querySelectorAll('input[data-duty-field]').forEach(inp => {
-                inp.addEventListener('input', () => {
-                    const i = Number(inp.dataset.idx);
-                    draftState.dutyByDay[dayKey][i][inp.dataset.dutyField] = inp.value;
-                });
-            });
-            container.querySelectorAll('button[data-duty-del]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    draftState.dutyByDay[dayKey].splice(Number(btn.dataset.dutyDel), 1);
-                    renderModalDutyEditor();
-                });
+                const isActive = btn.dataset.tab === tabName;
+                btn.classList.toggle('border-brand-blue', isActive);
+                btn.classList.toggle('text-brand-blue', isActive);
+                btn.classList.toggle('border-transparent', !isActive);
+                if (!isActive && btn.dataset.tab !== 'extras' && btn.dataset.tab !== 'simulation') {
+                    btn.classList.add('text-slate-500');
+                }
             });
         }
 
-        function renderModalScheduleEditor() {
-            const container = document.getElementById('modal-schedule-editor');
-            container.innerHTML = (draftState.schedule || []).map((item, idx) => `
-                <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700">
-                    <span class="text-xs font-bold w-14 shrink-0 text-slate-600 dark:text-slate-300">${escapeHtml(item.name)}</span>
-                    <input type="time" data-sched-field="start" data-idx="${idx}" value="${escapeHtml(item.start)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-                    <span class="text-xs text-slate-400">-</span>
-                    <input type="time" data-sched-field="end" data-idx="${idx}" value="${escapeHtml(item.end)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-                </div>
-            `).join('');
-            container.querySelectorAll('input[data-sched-field]').forEach(inp => {
-                inp.addEventListener('change', () => {
-                    draftState.schedule[Number(inp.dataset.idx)][inp.dataset.schedField] = inp.value;
-                });
-            });
-        }
-
-        function renderModalClassSelect() {
-            const sel = document.getElementById('inp-class-select');
-            const prev = sel.value;
-            const names = Object.keys(draftState.classPrograms || {});
-            sel.innerHTML = names.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-            if (names.includes(prev)) sel.value = prev;
-            renderModalClassLessonsEditor();
-        }
-
-        function renderModalClassLessonsEditor() {
-            const cls = document.getElementById('inp-class-select').value;
-            const dayKey = document.getElementById('inp-class-day-select').value;
-            const container = document.getElementById('modal-class-lessons-editor');
-            if (!cls || !draftState.classPrograms[cls]) {
-                container.innerHTML = '<div class="text-xs text-slate-500">Önce bir şube ekleyin.</div>';
-                return;
-            }
-            if (!draftState.classPrograms[cls][dayKey]) {
-                draftState.classPrograms[cls][dayKey] = Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }));
-            }
-            const lessons = draftState.classPrograms[cls][dayKey];
-            while (lessons.length < (draftState.schedule.length || 8)) {
-                lessons.push({ subject: '', teacher: '' });
-            }
-
-            container.innerHTML = lessons.map((l, idx) => `
-                <div class="grid grid-cols-12 gap-2 items-center">
-                    <span class="col-span-2 text-xs font-bold text-slate-500 dark:text-slate-300">${idx + 1}. Ders</span>
-                    <input type="text" data-cls-field="subject" data-idx="${idx}" value="${escapeHtml(l.subject)}" placeholder="Ders Adı"
-                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-bold">
-                    <input type="text" data-cls-field="teacher" data-idx="${idx}" value="${escapeHtml(l.teacher)}" placeholder="Öğretmen"
-                        class="col-span-5 px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
-                </div>
-            `).join('');
-
-            container.querySelectorAll('input[data-cls-field]').forEach(inp => {
-                inp.addEventListener('input', () => {
-                    draftState.classPrograms[cls][dayKey][Number(inp.dataset.idx)][inp.dataset.clsField] = inp.value;
-                });
-            });
-        }
-
-        function renderModalNoticesEditor() {
-            const container = document.getElementById('modal-notices-editor');
-            container.innerHTML = (draftState.notices || []).map((n, idx) => `
-                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 space-y-2">
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" data-notice-field="tag" data-idx="${idx}" value="${escapeHtml(n.tag)}" placeholder="Etiket"
-                            class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-bold">
-                        <input type="text" data-notice-field="title" data-idx="${idx}" value="${escapeHtml(n.title)}" placeholder="Başlık"
-                            class="col-span-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-bold">
-                    </div>
-                    <input type="text" data-notice-field="desc" data-idx="${idx}" value="${escapeHtml(n.desc)}" placeholder="Açıklama"
-                        class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs">
-                </div>
-            `).join('');
-            container.querySelectorAll('input[data-notice-field]').forEach(inp => {
-                inp.addEventListener('input', () => {
-                    draftState.notices[Number(inp.dataset.idx)][inp.dataset.noticeField] = inp.value;
-                });
-            });
-        }
-
-        function renderModalMenuEditor() {
-            const dayKey = document.getElementById('inp-menu-day-select').value;
-            const m = draftState.menuByDay[dayKey] || { soup: '', main: '', side: '', extra: '' };
-            document.getElementById('inp-menu-soup').value = m.soup || '';
-            document.getElementById('inp-menu-main').value = m.main || '';
-            document.getElementById('inp-menu-side').value = m.side || '';
-            document.getElementById('inp-menu-extra').value = m.extra || '';
-        }
-
-        function updateModalLogoPreview() {
+        function renderModalLogoPreview() {
             const img = document.getElementById('preview-logo-img');
             const svg = document.getElementById('preview-logo-svg');
-            if (draftState.customLogo) {
-                img.src = draftState.customLogo;
+            if (modalLogoDraft) {
+                img.src = modalLogoDraft;
                 img.classList.remove('hidden');
                 svg.classList.add('hidden');
             } else {
@@ -1898,160 +2279,260 @@
             }
         }
 
-        function openSettingsModal() {
-            draftState = deepClone(state);
-            document.getElementById('inp-school-name').value = draftState.schoolName || '';
-            document.getElementById('inp-school-subtitle').value = draftState.schoolSubtitle || '';
-            document.getElementById('inp-weather-auto').checked = !!draftState.weatherAuto;
-            document.getElementById('inp-weather-icon').value = draftState.weatherIcon || '🌤️';
-            document.getElementById('inp-weather-text').value = draftState.weatherText || '';
-            document.getElementById('inp-autodark-enabled').checked = !!(draftState.autoDark && draftState.autoDark.enabled);
-            document.getElementById('inp-autodark-weather').checked = !!(draftState.autoDark && draftState.autoDark.byWeather);
-            document.getElementById('inp-autodark-time').checked = !!(draftState.autoDark && draftState.autoDark.byTime);
-            document.getElementById('inp-autodark-start').value = (draftState.autoDark && draftState.autoDark.startTime) || '17:30';
-            document.getElementById('inp-autodark-end').value = (draftState.autoDark && draftState.autoDark.endTime) || '07:30';
-            document.getElementById('inp-qr-protection').checked = !!draftState.qrProtection;
-            document.getElementById('inp-ticker-lines').value = (draftState.tickerLines || []).join('\n');
-            document.getElementById('inp-sim-enabled').checked = !!(draftState.simulation && draftState.simulation.enabled);
-            document.getElementById('inp-sim-day').value = String((draftState.simulation && draftState.simulation.dayIdx) || 3);
-            document.getElementById('inp-sim-time').value = (draftState.simulation && draftState.simulation.time) || '09:15';
+        function renderModalDutyEditor() {
+            const day = document.getElementById('inp-duty-day-select').value;
+            const list = modalDutyDraft[day] || [];
+            const container = document.getElementById('modal-duty-editor');
+            container.innerHTML = list.map((item, idx) => `
+                <div class="grid grid-cols-12 gap-2 items-center">
+                    <input type="text" data-duty-idx="${idx}" data-duty-field="area" value="${escapeHtml(item.area)}" placeholder="Nöbet Yeri"
+                        class="col-span-5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <input type="text" data-duty-idx="${idx}" data-duty-field="teacher" value="${escapeHtml(item.teacher)}" placeholder="Nöbetçi Öğretmen"
+                        class="col-span-6 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <button type="button" data-duty-del="${idx}" title="Sil" class="col-span-1 h-8 rounded-lg flex items-center justify-center text-brand-red hover:bg-red-50 dark:hover:bg-red-500/15 transition">
+                        ✕
+                    </button>
+                </div>
+            `).join('');
 
-            updateModalLogoPreview();
+            container.querySelectorAll('input[data-duty-idx]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    const i = parseInt(inp.dataset.dutyIdx, 10);
+                    const f = inp.dataset.dutyField;
+                    if (modalDutyDraft[day]?.[i]) {
+                        modalDutyDraft[day][i][f] = inp.value;
+                    }
+                });
+            });
+
+            container.querySelectorAll('button[data-duty-del]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const i = parseInt(btn.dataset.dutyDel, 10);
+                    modalDutyDraft[day].splice(i, 1);
+                    renderModalDutyEditor();
+                });
+            });
+        }
+
+        function renderModalScheduleEditor() {
+            const container = document.getElementById('modal-schedule-editor');
+            container.innerHTML = (state.schedule || []).map((p, idx) => `
+                <div class="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700">
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-300 w-14 shrink-0">${escapeHtml(p.name)}</span>
+                    <input type="time" data-sched-idx="${idx}" data-sched-field="start" value="${escapeHtml(p.start)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <span class="text-xs text-slate-400">-</span>
+                    <input type="time" data-sched-idx="${idx}" data-sched-field="end" value="${escapeHtml(p.end)}" class="flex-1 px-2 py-1 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                </div>
+            `).join('');
+        }
+
+        function renderModalClassSelect() {
+            const sel = document.getElementById('inp-class-select');
+            const names = Object.keys(modalClassesDraft || {});
+            const prev = sel.value;
+            sel.innerHTML = names.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            if (prev && names.includes(prev)) sel.value = prev;
+            renderModalClassLessonsEditor();
+        }
+
+        function renderModalClassLessonsEditor() {
+            const cls = document.getElementById('inp-class-select').value;
+            const day = document.getElementById('inp-class-day-select').value;
+            const container = document.getElementById('modal-class-lessons-editor');
+            if (!cls || !modalClassesDraft[cls]) {
+                container.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">Düzenlemek için bir şube seçin veya yeni şube ekleyin.</div>`;
+                return;
+            }
+            if (!modalClassesDraft[cls][day]) {
+                modalClassesDraft[cls][day] = Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }));
+            }
+            const lessons = modalClassesDraft[cls][day];
+            while (lessons.length < 8) lessons.push({ subject: '', teacher: '' });
+
+            container.innerHTML = lessons.slice(0, 8).map((l, idx) => `
+                <div class="grid grid-cols-12 gap-2 items-center">
+                    <span class="col-span-2 text-xs font-bold text-slate-500 dark:text-slate-400">${idx + 1}. Ders</span>
+                    <input type="text" data-cls-idx="${idx}" data-cls-field="subject" value="${escapeHtml(l.subject)}" placeholder="Ders Adı"
+                        class="col-span-5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    <input type="text" data-cls-idx="${idx}" data-cls-field="teacher" value="${escapeHtml(l.teacher)}" placeholder="Öğretmen"
+                        class="col-span-5 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                </div>
+            `).join('');
+
+            container.querySelectorAll('input[data-cls-idx]').forEach(inp => {
+                inp.addEventListener('input', () => {
+                    const i = parseInt(inp.dataset.clsIdx, 10);
+                    const f = inp.dataset.clsField;
+                    modalClassesDraft[cls][day][i][f] = inp.value;
+                });
+            });
+        }
+
+        function renderModalNoticesEditor() {
+            const container = document.getElementById('modal-notices-editor');
+            const list = (state.notices || []).slice(0, 3);
+            while (list.length < 3) list.push({ tag: 'DUYURU', color: 'blue', title: '', desc: '' });
+
+            container.innerHTML = list.map((n, idx) => `
+                <div class="p-3 rounded-xl bg-slate-50 dark:bg-[#0D111D] border border-slate-200 dark:border-slate-700 space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <input type="text" data-notice-idx="${idx}" data-notice-field="tag" value="${escapeHtml(n.tag)}" placeholder="Etiket (ÖNEMLİ)"
+                            class="px-3 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                        <input type="text" data-notice-idx="${idx}" data-notice-field="title" value="${escapeHtml(n.title)}" placeholder="Duyuru Başlığı"
+                            class="sm:col-span-2 px-3 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+                    </div>
+                    <input type="text" data-notice-idx="${idx}" data-notice-field="desc" value="${escapeHtml(n.desc)}" placeholder="Kısa açıklama"
+                        class="w-full px-3 py-1.5 rounded-lg bg-white dark:bg-[#141928] border border-slate-200 dark:border-slate-700 text-xs">
+                </div>
+            `).join('');
+        }
+
+        function loadModalMenuFields() {
+            const day = document.getElementById('inp-menu-day-select').value;
+            const m = modalMenuDraft[day] || { soup: '', main: '', side: '', extra: '' };
+            document.getElementById('inp-menu-soup').value = m.soup || '';
+            document.getElementById('inp-menu-main').value = m.main || '';
+            document.getElementById('inp-menu-side').value = m.side || '';
+            document.getElementById('inp-menu-extra').value = m.extra || '';
+        }
+
+        function saveModalMenuFields() {
+            const day = document.getElementById('inp-menu-day-select').value;
+            modalMenuDraft[day] = {
+                soup: document.getElementById('inp-menu-soup').value.trim(),
+                main: document.getElementById('inp-menu-main').value.trim(),
+                side: document.getElementById('inp-menu-side').value.trim(),
+                extra: document.getElementById('inp-menu-extra').value.trim()
+            };
+        }
+
+        function openSettingsModal() {
+            resetConfirmPending = false;
+            document.getElementById('btn-reset-all').textContent = 'Varsayılana Sıfırla';
+
+            modalDutyDraft = deepClone(state.dutyByDay);
+            modalClassesDraft = deepClone(state.classPrograms);
+            modalMenuDraft = deepClone(state.menuByDay);
+            modalLogoDraft = state.customLogo || '';
+
+            document.getElementById('inp-school-name').value = state.schoolName || '';
+            document.getElementById('inp-school-subtitle').value = state.schoolSubtitle || '';
+            document.getElementById('inp-weather-auto').checked = Boolean(state.weatherAuto);
+            document.getElementById('inp-weather-icon').value = state.weatherIcon || '🌤️';
+            document.getElementById('inp-weather-text').value = state.weatherText || '';
+
+            document.getElementById('inp-autodark-enabled').checked = Boolean(state.autoDark?.enabled);
+            document.getElementById('inp-autodark-weather').checked = Boolean(state.autoDark?.byWeather);
+            document.getElementById('inp-autodark-time').checked = Boolean(state.autoDark?.byTime);
+            document.getElementById('inp-autodark-start').value = state.autoDark?.startTime || '17:30';
+            document.getElementById('inp-autodark-end').value = state.autoDark?.endTime || '07:30';
+
+            document.getElementById('inp-qr-protection').checked = Boolean(state.qrProtection);
+
+            document.getElementById('inp-interval-slide').value = state.intervals?.slideSec || 12;
+            document.getElementById('inp-interval-panel').value = state.intervals?.panelSec || 12;
+            document.getElementById('inp-interval-news').value = state.intervals?.newsMin || 30;
+            document.getElementById('inp-ticker-lines').value = (state.tickerLines || []).join('\n');
+
+            document.getElementById('inp-sim-enabled').checked = Boolean(state.simulation?.enabled);
+            document.getElementById('inp-sim-day').value = String(state.simulation?.dayIdx || 3);
+            document.getElementById('inp-sim-time').value = state.simulation?.time || '09:15';
+
+            renderModalLogoPreview();
             renderModalDutyEditor();
             renderModalScheduleEditor();
             renderModalClassSelect();
             renderModalNoticesEditor();
-            renderModalMenuEditor();
+            loadModalMenuFields();
+
             switchModalTab('general');
             document.getElementById('settings-modal').classList.remove('hidden');
         }
 
         function closeSettingsModal() {
             document.getElementById('settings-modal').classList.add('hidden');
-            draftState = null;
         }
 
-        // ==================== OLAY DİNLEYİCİLERİ ====================
-        document.getElementById('btn-theme').addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            state.theme = isDark ? 'light' : 'dark';
-            state.autoDark.enabled = false;
-            saveState();
-            applyTheme(state.theme);
-        });
+        function saveSettingsFromModal() {
+            saveModalMenuFields();
 
-        document.getElementById('btn-fullscreen').addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else {
-                document.exitFullscreen().catch(() => {});
-            }
-        });
+            state.schoolName = document.getElementById('inp-school-name').value.trim() || DEFAULT_STATE.schoolName;
+            state.schoolSubtitle = document.getElementById('inp-school-subtitle').value.trim() || DEFAULT_STATE.schoolSubtitle;
+            state.weatherAuto = document.getElementById('inp-weather-auto').checked;
+            state.weatherIcon = document.getElementById('inp-weather-icon').value;
+            state.weatherText = document.getElementById('inp-weather-text').value.trim() || DEFAULT_STATE.weatherText;
+            state.customLogo = modalLogoDraft;
 
-        document.getElementById('btn-settings').addEventListener('click', () => {
-            if (state.qrProtection) {
-                openQrLockModal();
-            } else {
-                openSettingsModal();
-            }
-        });
-
-        document.getElementById('btn-close-qr-modal').addEventListener('click', closeQrLockModal);
-        document.getElementById('btn-cancel-qr').addEventListener('click', closeQrLockModal);
-        document.getElementById('btn-refresh-qr').addEventListener('click', generateQrChallenge);
-        document.getElementById('btn-verify-qr').addEventListener('click', verifyQrPin);
-        document.getElementById('inp-qr-pin').addEventListener('input', (e) => {
-            const v = e.target.value.trim();
-            if (v === currentQrPin || v.toLowerCase() === ADMIN_MASTER_CODE) {
-                verifyQrPin();
-            }
-        });
-        document.getElementById('inp-qr-pin').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') verifyQrPin();
-        });
-
-        document.getElementById('btn-close-modal').addEventListener('click', closeSettingsModal);
-        document.getElementById('btn-cancel-modal').addEventListener('click', closeSettingsModal);
-
-        document.querySelectorAll('.modal-tab').forEach(btn => {
-            btn.addEventListener('click', () => switchModalTab(btn.dataset.tab));
-        });
-
-        document.getElementById('inp-duty-day-select').addEventListener('change', renderModalDutyEditor);
-        document.getElementById('btn-add-duty-area').addEventListener('click', () => {
-            const area = document.getElementById('inp-new-duty-area').value.trim();
-            const teacher = document.getElementById('inp-new-duty-teacher').value.trim();
-            const allDays = document.getElementById('inp-new-duty-all-days').checked;
-            if (!area) return;
-            if (allDays) {
-                for (let d = 1; d <= 5; d++) {
-                    const k = String(d);
-                    if (!draftState.dutyByDay[k]) draftState.dutyByDay[k] = [];
-                    draftState.dutyByDay[k].push({ area, teacher: k === document.getElementById('inp-duty-day-select').value ? teacher : '' });
-                }
-            } else {
-                const k = document.getElementById('inp-duty-day-select').value;
-                if (!draftState.dutyByDay[k]) draftState.dutyByDay[k] = [];
-                draftState.dutyByDay[k].push({ area, teacher });
-            }
-            document.getElementById('inp-new-duty-area').value = '';
-            document.getElementById('inp-new-duty-teacher').value = '';
-            renderModalDutyEditor();
-        });
-
-        document.getElementById('inp-class-select').addEventListener('change', renderModalClassLessonsEditor);
-        document.getElementById('inp-class-day-select').addEventListener('change', renderModalClassLessonsEditor);
-        document.getElementById('btn-add-class').addEventListener('click', () => {
-            const name = document.getElementById('inp-new-class-name').value.trim().toUpperCase();
-            if (!name || draftState.classPrograms[name]) return;
-            draftState.classPrograms[name] = {};
-            for (let d = 1; d <= 5; d++) {
-                draftState.classPrograms[name][String(d)] = Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }));
-            }
-            document.getElementById('inp-new-class-name').value = '';
-            renderModalClassSelect();
-            document.getElementById('inp-class-select').value = name;
-            renderModalClassLessonsEditor();
-        });
-        document.getElementById('btn-delete-class').addEventListener('click', () => {
-            const sel = document.getElementById('inp-class-select').value;
-            if (!sel || Object.keys(draftState.classPrograms).length <= 1) return;
-            delete draftState.classPrograms[sel];
-            renderModalClassSelect();
-        });
-
-        document.getElementById('inp-menu-day-select').addEventListener('change', renderModalMenuEditor);
-        ['soup', 'main', 'side', 'extra'].forEach(field => {
-            document.getElementById(`inp-menu-${field}`).addEventListener('input', (e) => {
-                const dayKey = document.getElementById('inp-menu-day-select').value;
-                if (!draftState.menuByDay[dayKey]) draftState.menuByDay[dayKey] = { soup: '', main: '', side: '', extra: '' };
-                draftState.menuByDay[dayKey][field] = e.target.value;
-            });
-        });
-
-        document.getElementById('inp-logo-file').addEventListener('change', (e) => {
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-                draftState.customLogo = reader.result;
-                updateModalLogoPreview();
+            state.autoDark = {
+                enabled: document.getElementById('inp-autodark-enabled').checked,
+                byWeather: document.getElementById('inp-autodark-weather').checked,
+                byTime: document.getElementById('inp-autodark-time').checked,
+                startTime: document.getElementById('inp-autodark-start').value || '17:30',
+                endTime: document.getElementById('inp-autodark-end').value || '07:30'
             };
-            reader.readAsDataURL(file);
-        });
-        document.getElementById('btn-reset-logo').addEventListener('click', () => {
-            draftState.customLogo = '';
-            updateModalLogoPreview();
-        });
+            manualThemeOverride = null;
 
-        document.querySelectorAll('.sim-preset').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('inp-sim-enabled').checked = true;
-                document.getElementById('inp-sim-time').value = btn.dataset.preset;
+            state.qrProtection = document.getElementById('inp-qr-protection').checked;
+
+            state.dutyByDay = deepClone(modalDutyDraft);
+            state.classPrograms = deepClone(modalClassesDraft);
+            state.menuByDay = deepClone(modalMenuDraft);
+
+            // Ders saatleri
+            const schedInputs = document.querySelectorAll('#modal-schedule-editor input[data-sched-idx]');
+            schedInputs.forEach(inp => {
+                const i = parseInt(inp.dataset.schedIdx, 10);
+                const f = inp.dataset.schedField;
+                if (state.schedule[i]) state.schedule[i][f] = inp.value;
             });
-        });
 
-        document.getElementById('btn-export-json').addEventListener('click', () => {
+            // Duyurular
+            const colors = ['red', 'blue', 'teal'];
+            const updatedNotices = [0, 1, 2].map(i => {
+                const tag = document.querySelector(`#modal-notices-editor input[data-notice-idx="${i}"][data-notice-field="tag"]`)?.value.trim() || 'DUYURU';
+                const title = document.querySelector(`#modal-notices-editor input[data-notice-idx="${i}"][data-notice-field="title"]`)?.value.trim() || '';
+                const desc = document.querySelector(`#modal-notices-editor input[data-notice-idx="${i}"][data-notice-field="desc"]`)?.value.trim() || '';
+                return { tag, color: state.notices[i]?.color || colors[i], title, desc };
+            }).filter(n => n.title || n.desc);
+            if (updatedNotices.length) state.notices = updatedNotices;
+
+            // Kayan yazı
+            const tickerRaw = document.getElementById('inp-ticker-lines').value
+                .split('\n')
+                .map(s => s.trim())
+                .filter(Boolean);
+            if (tickerRaw.length) state.tickerLines = tickerRaw;
+
+            // Geçiş süreleri
+            state.intervals = {
+                slideSec: Math.max(3, Math.min(120, parseInt(document.getElementById('inp-interval-slide').value, 10) || 12)),
+                panelSec: Math.max(3, Math.min(120, parseInt(document.getElementById('inp-interval-panel').value, 10) || 12)),
+                newsMin:  Math.max(5, Math.min(180, parseInt(document.getElementById('inp-interval-news').value, 10) || 30))
+            };
+
+            // Simülasyon
+            state.simulation = {
+                enabled: document.getElementById('inp-sim-enabled').checked,
+                dayIdx: parseInt(document.getElementById('inp-sim-day').value, 10) || 3,
+                time: document.getElementById('inp-sim-time').value || '09:15'
+            };
+
+            saveState();
+            lastDayKey = '';
+            renderHeaderBranding();
+            renderTicker();
+            renderNotices();
+            fetchKayseriWeather();
+            restartRotationTimers();
+            tickBoard();
+            closeSettingsModal();
+            showToast('Tüm ayarlar kaydedildi ve uygulandı.', 'success');
+        }
+
+        /* =========================================================
+           JSON DIŞA / İÇE AKTARMA
+           ========================================================= */
+        function exportSettingsJson() {
             const payload = {
                 app: 'cihangir-okul-panosu',
                 version: formatAppVersion(),
@@ -2059,129 +2540,287 @@
                 settings: state
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            const d = new Date().toISOString().slice(0, 10);
-            a.href = URL.createObjectURL(blob);
-            a.download = `cihangir-pano-ayarlari-${d}.json`;
+            const today = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `cihangir-pano-ayarlari-${today}.json`;
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(a.href);
-        });
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Ayarlar JSON dosyası olarak indirildi.', 'success');
+        }
 
-        document.getElementById('inp-import-json').addEventListener('change', (e) => {
-            const file = e.target.files && e.target.files[0];
+        function importSettingsJson(file) {
             if (!file) return;
             const reader = new FileReader();
             reader.onload = () => {
                 try {
-                    const parsed = JSON.parse(reader.result);
-                    const incoming = parsed.settings ? parsed.settings : parsed;
-                    state = normalizeState(incoming);
+                    const parsed = JSON.parse(String(reader.result || '{}'));
+                    const incoming = parsed.settings || parsed;
+                    if (!incoming || typeof incoming !== 'object') throw new Error('Geçersiz JSON');
+                    state = mergeWithDefaults(incoming);
                     saveState();
-                    closeSettingsModal();
-                    renderHeaderStatic();
+                    lastDayKey = '';
+                    renderHeaderBranding();
                     renderTicker();
-                    renderNoticesList();
+                    renderNotices();
+                    fetchKayseriWeather();
+                    restartRotationTimers();
                     tickBoard();
-                    if (state.weatherAuto) fetchKayseriWeather();
+                    openSettingsModal();
+                    showToast('JSON yedeği başarıyla içe aktarıldı!', 'success');
                 } catch (err) {
-                    alert('Geçersiz JSON dosyası!');
+                    showToast('JSON dosyası okunamadı. Lütfen geçerli bir yedek seçin.', 'error');
                 }
             };
             reader.readAsText(file);
-            e.target.value = '';
-        });
+        }
 
-        document.getElementById('btn-reset-all').addEventListener('click', () => {
-            if (!confirm('Tüm ayarlar varsayılan değerlere sıfırlansın mı?')) return;
-            state = deepClone(DEFAULT_STATE);
-            saveState();
-            closeSettingsModal();
-            renderHeaderStatic();
+        /* =========================================================
+           OLAY DİNLEYİCİLERİ VE BAŞLATMA
+           ========================================================= */
+        function bindEvents() {
+            // Tema manuel değiştirme
+            document.getElementById('btn-theme').addEventListener('click', () => {
+                const isCurrentlyDark = document.documentElement.classList.contains('dark');
+                manualThemeOverride = isCurrentlyDark ? 'light' : 'dark';
+                state.theme = manualThemeOverride;
+                saveState();
+                applyTheme();
+            });
+
+            // Tam ekran
+            document.getElementById('btn-fullscreen').addEventListener('click', () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen?.();
+                    } else {
+                        document.exitFullscreen?.();
+                    }
+                } catch (e) {}
+            });
+
+            // Ayarlar butonu -> QR kilidi
+            document.getElementById('btn-settings').addEventListener('click', openQrLockModal);
+
+            // QR modal olayları
+            document.getElementById('btn-close-qr-modal').addEventListener('click', closeQrLockModal);
+            document.getElementById('btn-cancel-qr').addEventListener('click', closeQrLockModal);
+            document.getElementById('btn-refresh-qr').addEventListener('click', generateQrChallenge);
+            document.getElementById('btn-verify-qr').addEventListener('click', verifyQrPin);
+
+            const qrPinInput = document.getElementById('inp-qr-pin');
+            qrPinInput.addEventListener('input', () => {
+                document.getElementById('qr-pin-error').classList.add('hidden');
+                const val = qrPinInput.value.trim();
+                if (val.toLowerCase() === MASTER_ADMIN_CODE || (/^\d{5}$/.test(val) && val === currentQrPin)) {
+                    verifyQrPin();
+                }
+            });
+            qrPinInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') verifyQrPin();
+            });
+
+            // Sağ alt panel sekmeleri
+            document.getElementById('btn-panel-notices').addEventListener('click', () => setRightPanel('notices'));
+            document.getElementById('btn-panel-news').addEventListener('click', () => setRightPanel('news'));
+            document.getElementById('btn-panel-menu').addEventListener('click', () => setRightPanel('menu'));
+            document.getElementById('btn-panel-world').addEventListener('click', () => setRightPanel('world'));
+
+            // Manuel haber güncelleme (ana ekran & modal)
+            document.getElementById('btn-refresh-news').addEventListener('click', () => fetchDailyInternetContent(true));
+            document.getElementById('btn-modal-refresh-news').addEventListener('click', () => fetchDailyInternetContent(true));
+
+            // Sayfalama butonları
+            document.getElementById('timetable-page-indicator').addEventListener('click', () => {
+                currentClassPage++;
+                tickBoard();
+            });
+            document.getElementById('duty-page-indicator').addEventListener('click', () => {
+                currentDutyPage++;
+                renderDutyList(getEffectiveNow());
+            });
+
+            // Modal kapatma / kaydetme
+            document.getElementById('btn-close-modal').addEventListener('click', closeSettingsModal);
+            document.getElementById('btn-cancel-modal').addEventListener('click', closeSettingsModal);
+            document.getElementById('btn-save-modal').addEventListener('click', saveSettingsFromModal);
+
+            // Modal sekmeleri
+            document.querySelectorAll('.modal-tab').forEach(btn => {
+                btn.addEventListener('click', () => switchModalTab(btn.dataset.tab));
+            });
+
+            // Logo yükle / sıfırla
+            document.getElementById('inp-logo-file').addEventListener('change', (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    modalLogoDraft = String(reader.result || '');
+                    renderModalLogoPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('btn-reset-logo').addEventListener('click', () => {
+                modalLogoDraft = '';
+                renderModalLogoPreview();
+            });
+
+            // JSON Dışa / İçe Aktar
+            document.getElementById('btn-export-json').addEventListener('click', exportSettingsJson);
+            document.getElementById('inp-import-json').addEventListener('change', (e) => {
+                const file = e.target.files?.[0];
+                if (file) importSettingsJson(file);
+                e.target.value = '';
+            });
+
+            // Nöbet günü değişimi & yeni nöbet yeri ekleme
+            document.getElementById('inp-duty-day-select').addEventListener('change', renderModalDutyEditor);
+            document.getElementById('btn-add-duty-area').addEventListener('click', () => {
+                const area = document.getElementById('inp-new-duty-area').value.trim();
+                const teacher = document.getElementById('inp-new-duty-teacher').value.trim();
+                const allDays = document.getElementById('inp-new-duty-all-days').checked;
+                if (!area) {
+                    showToast('Lütfen bir nöbet yeri adı girin.', 'error');
+                    return;
+                }
+                const targetDays = allDays ? ['1', '2', '3', '4', '5'] : [document.getElementById('inp-duty-day-select').value];
+                targetDays.forEach(d => {
+                    if (!modalDutyDraft[d]) modalDutyDraft[d] = [];
+                    modalDutyDraft[d].push({ area, teacher: d === document.getElementById('inp-duty-day-select').value ? teacher : '' });
+                });
+                document.getElementById('inp-new-duty-area').value = '';
+                document.getElementById('inp-new-duty-teacher').value = '';
+                renderModalDutyEditor();
+                showToast('Nöbet yeri eklendi.', 'success');
+            });
+
+            // Sınıf dersleri sekmesi
+            document.getElementById('inp-class-select').addEventListener('change', renderModalClassLessonsEditor);
+            document.getElementById('inp-class-day-select').addEventListener('change', renderModalClassLessonsEditor);
+            document.getElementById('btn-add-class').addEventListener('click', () => {
+                const name = document.getElementById('inp-new-class-name').value.trim().toUpperCase();
+                if (!name) {
+                    showToast('Lütfen yeni şube adını girin.', 'error');
+                    return;
+                }
+                if (modalClassesDraft[name]) {
+                    showToast('Bu şube zaten mevcut.', 'error');
+                    return;
+                }
+                modalClassesDraft[name] = {
+                    1: Array.from({ length: 8 }, () => ({ subject: '', teacher: '' })),
+                    2: Array.from({ length: 8 }, () => ({ subject: '', teacher: '' })),
+                    3: Array.from({ length: 8 }, () => ({ subject: '', teacher: '' })),
+                    4: Array.from({ length: 8 }, () => ({ subject: '', teacher: '' })),
+                    5: Array.from({ length: 8 }, () => ({ subject: '', teacher: '' }))
+                };
+                document.getElementById('inp-new-class-name').value = '';
+                renderModalClassSelect();
+                document.getElementById('inp-class-select').value = name;
+                renderModalClassLessonsEditor();
+                showToast(`${name} şubesi eklendi.`, 'success');
+            });
+
+            document.getElementById('btn-delete-class').addEventListener('click', () => {
+                const cls = document.getElementById('inp-class-select').value;
+                if (!cls || !modalClassesDraft[cls]) return;
+                delete modalClassesDraft[cls];
+                renderModalClassSelect();
+                showToast(`${cls} şubesi silindi.`, 'info');
+            });
+
+            // Yemek menüsü günü değişimi
+            let lastMenuDay = document.getElementById('inp-menu-day-select').value;
+            document.getElementById('inp-menu-day-select').addEventListener('change', (e) => {
+                // Önceki günü taslağa kaydet
+                modalMenuDraft[lastMenuDay] = {
+                    soup: document.getElementById('inp-menu-soup').value.trim(),
+                    main: document.getElementById('inp-menu-main').value.trim(),
+                    side: document.getElementById('inp-menu-side').value.trim(),
+                    extra: document.getElementById('inp-menu-extra').value.trim()
+                };
+                lastMenuDay = e.target.value;
+                loadModalMenuFields();
+            });
+
+            // Simülasyon hızlı saat butonları
+            document.querySelectorAll('.sim-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('inp-sim-enabled').checked = true;
+                    document.getElementById('inp-sim-time').value = btn.dataset.preset;
+                });
+            });
+
+            // Varsayılana sıfırla (iki tıklamalı güvenli onay, confirm() yok)
+            document.getElementById('btn-reset-all').addEventListener('click', () => {
+                const btn = document.getElementById('btn-reset-all');
+                if (!resetConfirmPending) {
+                    resetConfirmPending = true;
+                    btn.textContent = 'Emin misiniz? Tekrar Tıklayın';
+                    setTimeout(() => {
+                        resetConfirmPending = false;
+                        btn.textContent = 'Varsayılana Sıfırla';
+                    }, 4000);
+                    return;
+                }
+                state = deepClone(DEFAULT_STATE);
+                manualThemeOverride = null;
+                saveState();
+                lastDayKey = '';
+                renderHeaderBranding();
+                renderTicker();
+                renderNotices();
+                fetchKayseriWeather();
+                restartRotationTimers();
+                tickBoard();
+                closeSettingsModal();
+                showToast('Tüm ayarlar varsayılana sıfırlandı.', 'info');
+            });
+        }
+
+        /* =========================================================
+           BAŞLATMA (WINDOW ONLOAD)
+           ========================================================= */
+        window.onload = function () {
+            bindEvents();
+            renderHeaderBranding();
             renderTicker();
-            renderNoticesList();
-            tickBoard();
-            fetchKayseriWeather();
-        });
-
-        document.getElementById('btn-save-modal').addEventListener('click', () => {
-            draftState.schoolName = document.getElementById('inp-school-name').value.trim() || 'CİHANGİR OKULLARI';
-            draftState.schoolSubtitle = document.getElementById('inp-school-subtitle').value.trim() || 'Kayseri Merkez Kampüs';
-            draftState.weatherAuto = document.getElementById('inp-weather-auto').checked;
-            draftState.weatherIcon = document.getElementById('inp-weather-icon').value;
-            draftState.weatherText = document.getElementById('inp-weather-text').value.trim();
-            draftState.autoDark = {
-                enabled: document.getElementById('inp-autodark-enabled').checked,
-                byWeather: document.getElementById('inp-autodark-weather').checked,
-                byTime: document.getElementById('inp-autodark-time').checked,
-                startTime: document.getElementById('inp-autodark-start').value || '17:30',
-                endTime: document.getElementById('inp-autodark-end').value || '07:30'
-            };
-            draftState.qrProtection = document.getElementById('inp-qr-protection').checked;
-            const lines = document.getElementById('inp-ticker-lines').value.split('\n').map(s => s.trim()).filter(Boolean);
-            draftState.tickerLines = lines.length ? lines : deepClone(DEFAULT_STATE.tickerLines);
-            draftState.simulation = {
-                enabled: document.getElementById('inp-sim-enabled').checked,
-                dayIdx: Number(document.getElementById('inp-sim-day').value) || 3,
-                time: document.getElementById('inp-sim-time').value || '09:15'
-            };
-
-            state = normalizeState(draftState);
-            saveState();
-            closeSettingsModal();
-            renderHeaderStatic();
-            renderTicker();
-            renderNoticesList();
-            tickBoard();
-            if (state.weatherAuto) fetchKayseriWeather();
-        });
-
-        // Sağ alt sekme butonları ve nöbet sayfa geçişi
-        document.getElementById('btn-panel-notices').addEventListener('click', () => setRightPanel('notices'));
-        document.getElementById('btn-panel-news').addEventListener('click', () => setRightPanel('news'));
-        document.getElementById('btn-panel-menu').addEventListener('click', () => setRightPanel('menu'));
-        document.getElementById('btn-panel-world').addEventListener('click', () => setRightPanel('world'));
-        document.getElementById('duty-page-indicator').addEventListener('click', () => {
-            currentDutyPage++;
-            renderDutyCard(getEffectiveDate());
-        });
-
-        // ==================== BAŞLATMA & ZAMANLAYICILAR ====================
-        renderHeaderStatic();
-        renderTicker();
-        renderSlide();
-        renderNoticesList();
-        renderNewsList();
-        renderWorldCenters();
-        setRightPanel('notices');
-        tickBoard();
-
-        fetchKayseriWeather();
-        fetchWorldCentersWeather();
-        fetchDailyShowcaseAndNews();
-
-        setInterval(tickBoard, 1000);
-        setInterval(() => {
-            currentClassPage++;
-            tickBoard();
-        }, 7000);
-        setInterval(() => {
-            currentDutyPage++;
-            renderDutyCard(getEffectiveDate());
-        }, 6000);
-        setInterval(() => {
-            currentSlideIdx++;
+            renderNotices();
+            renderNewsList();
+            renderWorldCenters();
             renderSlide();
-        }, 8000);
-        setInterval(() => {
-            const order = ['notices', 'news', 'menu', 'world'];
-            const next = order[(order.indexOf(activeRightPanel) + 1) % order.length];
-            setRightPanel(next);
-        }, 10000);
-        setInterval(() => {
+            setRightPanel('notices');
+
+            tickBoard();
+            setInterval(tickBoard, 1000);
+
+            // Sınıflar (7 sn) ve Nöbet sayfaları (8 sn) otomatik geçiş
+            setInterval(() => {
+                currentClassPage++;
+                tickBoard();
+            }, 7000);
+
+            setInterval(() => {
+                currentDutyPage++;
+                renderDutyList(getEffectiveNow());
+            }, 8000);
+
+            restartRotationTimers();
+
+            // Canlı hava durumu (Kayseri + 5 Dünya Merkezi) ve internet içerikleri
             fetchKayseriWeather();
             fetchWorldCentersWeather();
-        }, 15 * 60 * 1000);
-        setInterval(fetchDailyShowcaseAndNews, 30 * 60 * 1000);
+            fetchDailyInternetContent(false);
+
+            setInterval(() => {
+                fetchKayseriWeather();
+                fetchWorldCentersWeather();
+            }, 15 * 60 * 1000);
+        };
     </script>
 </body>
 </html>
